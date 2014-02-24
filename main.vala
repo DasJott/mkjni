@@ -52,7 +52,8 @@ class Main : GLib.Object
           ok = oJniFiles.createImplementation();
         }
         if (ok) {
-          oValaFile.compile2C(oClass);
+          // me need to be more specific here
+          //oValaFile.compile2C(oClass);
         }
       } else {
         stdout.printf("Ooops, class is null!\n");
