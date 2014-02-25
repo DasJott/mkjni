@@ -90,15 +90,17 @@ public class JavaFile : GLib.Object
   private File? getFile(Class oClass, string sPackage)
   {
     try {
-      string sPath = sPackage.replace(".", "/");
-      {
+      string sPath = "";
+      if (sPackage != null) {
+        sPackage.replace(".", "/");
         File oFile = File.new_for_path( sPath );
         if (!oFile.query_exists()) {
           oFile.make_directory_with_parents();
         }
+        sPath += "/";
       }
 
-      string sFilepath = sPath + "/" + oClass.name + ".java";
+      string sFilepath = sPath + oClass.name + ".java";
 
       var oFile = File.new_for_path( sFilepath );
       if (oFile.query_exists()) {
