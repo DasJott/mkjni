@@ -32,4 +32,4 @@ To build mkjni use the the following command inside the mkjni directory
 
     $ make
     
-a folder named build will be create which contains the mkjni binary.
+a folder named build will be created which would contain the mkjni binary.
