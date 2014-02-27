@@ -97,7 +97,7 @@ public class JavaFile : GLib.Object
         if (!oFile.query_exists()) {
           oFile.make_directory_with_parents();
         }
-        sPath += "/";
+        sPath += "./"; // save the file in the current directory
       }
 
       string sFilepath = sPath + oClass.name + ".java";
