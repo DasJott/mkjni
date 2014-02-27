@@ -91,7 +91,7 @@ public class JavaFile : GLib.Object
   {
     try {
       string sPath = "";
-      if (sPackage != null) {
+      if (sPackage != null && sPackage != "") {
         sPackage.replace(".", "/");
         File oFile = File.new_for_path( sPath );
         if (!oFile.query_exists()) {
