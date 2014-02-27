@@ -92,12 +92,16 @@ public class JavaFile : GLib.Object
     try {
       string sPath = "";
       if (sPackage != null && sPackage != "") {
-        sPackage.replace(".", "/");
-        File oFile = File.new_for_path( sPath );
-        if (!oFile.query_exists()) {
-          oFile.make_directory_with_parents();
+        if (sPackage.contains("/")) {
+          stderr.printf("Error: Specified package name not valid\n");
+        } else {
+          sPackage.replace(".", "/");
+          File oFile = File.new_for_path( sPath );
+          if (!oFile.query_exists()) {
+            oFile.make_directory_with_parents();
+          }
+          sPath += "/";
         }
-        sPath += "/";
       }
 
       string sFilepath = sPath + oClass.name + ".java";
