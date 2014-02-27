@@ -95,7 +95,7 @@ public class JavaFile : GLib.Object
         if (sPackage.contains("/")) {
           stderr.printf("Error: Specified package name not valid\n");
         } else {
-          sPackage.replace(".", "/");
+          sPath = sPackage.replace(".", "/");
           File oFile = File.new_for_path( sPath );
           if (!oFile.query_exists()) {
             oFile.make_directory_with_parents();
