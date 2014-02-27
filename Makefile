@@ -8,4 +8,7 @@ all: clean
 	valac --quiet --pkg gtk+-3.0 -o build/mkjni ${sourcefiles}
 
 clean:
-	rm -r build/
+	if [ -a build] ; \
+	then\
+		rm -r build/; \
+	fi;
