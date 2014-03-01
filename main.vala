@@ -24,42 +24,16 @@
 
 class Main : GLib.Object
 {
-  /**
-   * args:
-   * 1: vala file
-   * 2: vala class
-   * 3: java package
-   * 4: lib name
-  */
   public static int main(string[] args)
   {
     //test(); return 0;
 
     bool ok = false;
 
-    try {
-      var oValaFile = new ValaFile(args[1]);
-      Class oClass = oValaFile.parse(args[2]);
-      if (oClass != null) {
-        var oJavaFile = new JavaFile(args[4]);
-        ok = oJavaFile.create(oClass, args[3]);
-        JNIFiles oJniFiles = null;
-        if (ok) {
-          oJniFiles = new JNIFiles(oClass, args[3]);
-          ok = oJniFiles.createHeader();
-        }
-        if (ok) {
-          ok = oJniFiles.createImplementation();
-        }
-        if (ok) {
-          // me need to be more specific here
-          //oValaFile.compile2C(oClass);
-        }
-      } else {
-        stdout.printf("Ooops, class is null!\n");
-      }
-    } catch (Error e) {
-      stderr.printf("%s\n", e.message);
+    var oArgs = CmdArgs.parse(args);
+    if (oArgs != null) {
+      var oProc = new Processor();
+      ok = oProc.run(oArgs);
     }
 
     if (ok) {

@@ -40,10 +40,10 @@ public class JNIFiles : GLib.Object
     classPath = sPath + oClass.name;
   }
 
-  private string classPath
+  public string classPath
   {
     get;
-    set;
+    construct set;
   }
 
   public bool createHeader()
