@@ -26,15 +26,16 @@ public class Class
 {
   public Class(string sName) { name = sName; }
   public string name = "";
+  public string filename = ""; // generic filename w/o suffix
   public List<Class.Method> methods = new List<Class.Method>();
 
   public string c_getConstructor()
   {
-    return name + "_new()";
+    return name.down() + "_new()";
   }
   public string c_getName(Method oMethod)
   {
-    return name + "_" + oMethod.name;
+    return name.down() + "_" + oMethod.name;
   }
 
   public class Method

@@ -40,6 +40,7 @@ public class ValaFile : GLib.Object
     if (m_oFile != null) {
       try {
         Class oClass = new Class(sClassname);
+        oClass.filename = getGenericFilename(m_oFile);
 
         int nOpenBraces = 0;
         bool bIsComment = false, bInClass = false;
@@ -191,6 +192,16 @@ public class ValaFile : GLib.Object
     }
 
     return ok;
+  }
+
+  private string getGenericFilename(File oFile)
+  {
+    string sBasename = oFile.get_basename();
+    int nPos = sBasename.last_index_of(".");
+    if (nPos > 0) {
+      return sBasename.slice(0, nPos);
+    }
+    return "";
   }
 }
 
