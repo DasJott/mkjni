@@ -24,11 +24,12 @@
 
 public class CmdArgs : GLib.Object
 {
-  public string AppName { private set; get; default=""; }
-  public string VFile   { private set; get; default=""; } // -f --file
-  public string VClass  { private set; get; default=""; } // -c --class
-  public string Package { private set; get; default=""; } // -p --pkg
-  public string LibName { private set; get; default=""; } // -l --lib
+  public string AppName { private set; get; default="";    }
+  public string VFile   { private set; get; default="";    } // -f --file
+  public string VClass  { private set; get; default="";    } // -c --class
+  public string Package { private set; get; default="";    } // -p --pkg
+  public string LibName { private set; get; default="";    } // -l --lib
+  public bool   PkgDir  { private set; get; default=false; } // -l --lib
 
   private CmdArgs() {}
 
@@ -43,7 +44,11 @@ public class CmdArgs : GLib.Object
 
   private bool parsePrivate(string[] args)
   {
-    AppName = args[0];
+    {
+      string sApp = args[0];
+      int nPos = sApp.last_index_of("/");
+      AppName = sApp.substring(nPos+1);
+    }
 
     string opt = null;
 
@@ -73,6 +78,9 @@ public class CmdArgs : GLib.Object
           case "-l":
           case "--lib":
             opt = "l";
+            break;
+          case "-d":
+            opt = "d";
             break;
           case "?":
           case "-?":

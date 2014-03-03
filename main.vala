@@ -36,12 +36,6 @@ class Main : GLib.Object
       ok = oProc.run(oArgs);
     }
 
-    if (ok) {
-      stdout.printf("Success!\n");
-    } else {
-      stdout.printf("Errrrrr!\n");
-    }
-
     return 0;
   }
 
