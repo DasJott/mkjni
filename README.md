@@ -11,20 +11,21 @@ By now you must only use string, int or void as parameters and return types.
 
 The arguments for mkjni are to be specified as follows:
 
+Must-have:
+
 -f, --file <vala file>    A valid vala file to start with
 
 -c, --class <class name>  A class within the vala file to generate the jni from
-
--p, --pkg <package>       The Java package (namespace) to be created
 
 -l, --lib <lib name>      Please specify how the library will be named
                           This is for the call to loadLibrary within the Java file
                           and can be changed manually later
                           Please specify w/o lib prefix and .so suffix!
 
-All four parameters are must-have!
 
 Options:
+
+-p, --pkg <package>       The Java package (namespace) to be created
 
 -h, --help for showing help
 

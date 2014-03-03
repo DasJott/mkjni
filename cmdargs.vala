@@ -99,11 +99,11 @@ public class CmdArgs : GLib.Object
          AppName != ""
       && VFile   != ""
       && VClass  != ""
-      && Package != ""
       && LibName != ""
     ) {
       return true;
     }
+    stderr.printf("Too less parameters!\n");
     return false;
   }
 
@@ -112,20 +112,24 @@ public class CmdArgs : GLib.Object
     stderr.printf("\n");
     stderr.printf("-- %s - make jni files from vala --\n", AppName);
     stderr.printf("\n");
-    stderr.printf("usage: %s [PARAMS]\n", AppName);
+    stderr.printf("usage: %s [PARAMS][OPTIONS]\n", AppName);
     stderr.printf("\n");
-    stderr.printf("---- Must parameters: ----\n");
+    stderr.printf("---- Must-have parameters: ----\n");
     stderr.printf("\n");
     stderr.printf("-f, --file <vala file>    A valid vala file to start with\n");
     stderr.printf("\n");
     stderr.printf("-c, --class <class name>  A class within the vala file to generate the jni from\n");
     stderr.printf("\n");
-    stderr.printf("-p, --pkg <package>       The Java package (namespace) to be created\n");
-    stderr.printf("\n");
     stderr.printf("-l, --lib <lib name>      Please specify how the library will be named\n");
     stderr.printf("                          This is for the call to loadLibrary within the Java file\n");
     stderr.printf("                          and can be changed manually later\n");
     stderr.printf("                          Please specify w/o lib prefix and .so suffix!\n");
+    stderr.printf("\n");
+    stderr.printf("---- Options: ----\n");
+    stderr.printf("\n");
+    stderr.printf("-p, --pkg <package>       The Java package (namespace) to be created\n");
+    stderr.printf("\n");
+    stderr.printf("-h, --help, -?, ?         Show this help\n");
     stderr.printf("\n");
   }
 
