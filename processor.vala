@@ -33,10 +33,10 @@ public class Processor : GLib.Object
       Class oClass = oValaFile.parse(c.VClass);
       if (oClass != null) {
         var oJavaFile = new JavaFile(c.LibName);
-        ok = oJavaFile.create(oClass, c.Package);
+        ok = oJavaFile.create(oClass, c.Package, c.PkgDir);
         JNIFiles oJniFiles = null;
         if (ok) {
-          oJniFiles = new JNIFiles(oClass, c.LibName);
+          oJniFiles = new JNIFiles(oClass, c.Package);
           ok = oJniFiles.createHeader();
         }
         if (ok) {

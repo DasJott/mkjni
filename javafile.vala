@@ -31,9 +31,9 @@ public class JavaFile : GLib.Object
     m_sLibName = sLoadLib;
   }
 
-  public bool create(Class oClass, string? sPackage=null)
+  public bool create(Class oClass, string? sPackage=null, bool bPkgDir=false)
   {
-    File oFile = getFile(oClass, sPackage);
+    File oFile = getFile(oClass, sPackage, bPkgDir);
 
     if (oFile != null) {
       try {
@@ -87,11 +87,11 @@ public class JavaFile : GLib.Object
     return true;
   }
 
-  private File? getFile(Class oClass, string sPackage)
+  private File? getFile(Class oClass, string sPackage, bool bPkgDir)
   {
     try {
       string sPath = "";
-      if (sPackage != null && sPackage != "") {
+      if (bPkgDir && sPackage != null && sPackage != "") {
         if (sPackage.contains("/")) {
           stderr.printf("Error: Specified package name not valid\n");
         } else {

@@ -29,7 +29,7 @@ public class CmdArgs : GLib.Object
   public string VClass  { private set; get; default="";    } // -c --class
   public string Package { private set; get; default="";    } // -p --pkg
   public string LibName { private set; get; default="";    } // -l --lib
-  public bool   PkgDir  { private set; get; default=false; } // -l --lib
+  public bool   PkgDir  { private set; get; default=false; } // -d
 
   private CmdArgs() {}
 
@@ -80,7 +80,7 @@ public class CmdArgs : GLib.Object
             opt = "l";
             break;
           case "-d":
-            opt = "d";
+            PkgDir = true;
             break;
           case "?":
           case "-?":
@@ -89,6 +89,8 @@ public class CmdArgs : GLib.Object
             printHelp();
             return false;
           default:
+            stderr.printf("Unknown option %s\n", args[i]);
+            printHelp();
             return false;
         }
       }
@@ -136,6 +138,8 @@ public class CmdArgs : GLib.Object
     stderr.printf("---- Options: ----\n");
     stderr.printf("\n");
     stderr.printf("-p, --pkg <package>       The Java package (namespace) to be created\n");
+    stderr.printf("\n");
+    stderr.printf("-d                        Create Java file in package directory\n");
     stderr.printf("\n");
     stderr.printf("-h, --help, -?, ?         Show this help\n");
     stderr.printf("\n");

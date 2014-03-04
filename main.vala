@@ -36,7 +36,10 @@ class Main : GLib.Object
       ok = oProc.run(oArgs);
     }
 
-    return 0;
+    if (ok) {
+      return 0;
+    }
+    return 1;
   }
 
   /*
