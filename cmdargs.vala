@@ -27,9 +27,11 @@ public class CmdArgs : GLib.Object
   public string AppName { private set; get; default="";    }
   public string VFile   { private set; get; default="";    } // -f --file
   public string VClass  { private set; get; default="";    } // -c --class
-  public string Package { private set; get; default="";    } // -p --pkg
+  public string Package { private set; get; default="";    } // -j --jns
   public string LibName { private set; get; default="";    } // -l --lib
   public bool   PkgDir  { private set; get; default=false; } // -d
+
+  public List<string> VPackages = new List<string>();        // -p --pkg
 
   private CmdArgs() {}
 
@@ -57,8 +59,11 @@ public class CmdArgs : GLib.Object
         switch (opt) {
           case "f": VFile   = args[i]; break;
           case "c": VClass  = args[i]; break;
-          case "p": Package = args[i]; break;
+          case "j": Package = args[i]; break;
           case "l": LibName = args[i]; break;
+          case "p":
+            VPackages.append( args[i] );
+            break;
         }
         opt = null;
       } else {
@@ -71,13 +76,17 @@ public class CmdArgs : GLib.Object
           case "--class":
             opt = "c";
             break;
-          case "-p":
-          case "--pkg":
-            opt = "p";
+          case "-j":
+          case "--jns":
+            opt = "j";
             break;
           case "-l":
           case "--lib":
             opt = "l";
+            break;
+          case "-p":
+          case "--pkg":
+            opt = "p";
             break;
           case "-d":
             PkgDir = true;
@@ -130,14 +139,14 @@ public class CmdArgs : GLib.Object
     stderr.printf("\n");
     stderr.printf("-c, --class <class name>  A class within the vala file to generate the jni from\n");
     stderr.printf("\n");
-    stderr.printf("-l, --lib <lib name>      Please specify how the library will be named\n");
-    stderr.printf("                          This is for the call to loadLibrary within the Java file\n");
-    stderr.printf("                          and can be changed manually later\n");
-    stderr.printf("                          Please specify w/o lib prefix and .so suffix!\n");
+    stderr.printf("-l, --lib <lib name>      Please specify the desired name of the library\n");
+    stderr.printf("                          The name is w/o lib prefix and .so suffix!\n");
     stderr.printf("\n");
     stderr.printf("---- Options: ----\n");
     stderr.printf("\n");
-    stderr.printf("-p, --pkg <package>       The Java package (namespace) to be created\n");
+    stderr.printf("-p, --pkg <package>       Packages to be included (Vala --pkg and pkg-config)\n");
+    stderr.printf("\n");
+    stderr.printf("-j, --jns <package>       The Java namespace (package) to be created\n");
     stderr.printf("\n");
     stderr.printf("-d                        Create Java file in package directory\n");
     stderr.printf("\n");

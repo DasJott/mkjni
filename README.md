@@ -17,17 +17,18 @@ Must-have:
 
 -c, --class <class name>  A class within the vala file to generate the jni from
 
--l, --lib <lib name>      Please specify how the library will be named
-                          This is for the call to loadLibrary within the Java file
-                          and can be changed manually later
-                          Please specify w/o lib prefix and .so suffix!
+-l, --lib <lib name>      Please specify the desired name of the library
+                          The name is w/o lib prefix and .so suffix!
 
 
 Options:
 
--p, --pkg <package>       The Java package (namespace) to be created
+-p, --pkg <package>       Packages to be included (Vala --pkg and pkg-config)
+
+-j, --jns <package>       The Java namespace (package) to be created
 
 -h, --help for showing help
+
 
 Note: mkjni creates all files (and directories for java packages) in the directory where it is called.
 
