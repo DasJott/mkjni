@@ -40,15 +40,13 @@ public class JNIFiles : GLib.Object
     classPath = sPath + oClass.name;
   }
 
-  public string classPath
-  {
-    get;
-    construct set;
-  }
+  public string classPath      { get; construct set; }
+  public string fileNameHeader { owned get { return classPath + ".h"; } }
+  public string fileNameImpl   { owned get { return classPath + ".c"; } }
 
   public bool createHeader()
   {
-    File oFile = getFile("h");
+    File oFile = getFile(fileNameHeader);
 
     if (oFile != null) {
       try {
@@ -91,7 +89,7 @@ public class JNIFiles : GLib.Object
 
   public bool createImplementation()
   {
-    File oFile = getFile("c");
+    File oFile = getFile(fileNameImpl);
 
     if (oFile != null) {
       try {
@@ -260,12 +258,10 @@ public class JNIFiles : GLib.Object
     return sParams;
   }
 
-  private File? getFile(string sSuffix)
+  private File? getFile(string sFilename)
   {
     try {
-      string sFilepath = classPath + "." + sSuffix;
-
-      var oFile = File.new_for_path( sFilepath );
+      var oFile = File.new_for_path( sFilename );
       if (oFile.query_exists()) {
         oFile.delete();
       }
