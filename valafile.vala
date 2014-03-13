@@ -129,33 +129,44 @@ public class ValaFile : GLib.Object
     return null;
   }
 
-  public bool compile2C(Class oClass)
+  public bool compile2C(List<string>? pkgs=null)
   {
     if (m_oFile != null) {
-      // TODO: compile the vala file to C code
-      // TODO: and fill function signatures into Class info struct
-
       string sFilename = m_oFile.get_basename();
-      string sHeader = sFilename;
-      int nPos = sFilename.last_index_of(".");
-      if (nPos > 0) {
-        sHeader = sFilename.slice(0, nPos) + ".h";
+      string sHeader = getGenericFilename(m_oFile) + ".h";
+
+      return compile2Ccode(sFilename, pkgs, sHeader);
+    }
+    return false;
+  }
+
+  public static bool compile2Ccode(string sFilename, List<string>? pkgs=null, string? sHeader=null)
+  {
+    string sHdr = "";
+    if (sHeader != null && sHeader != "") {
+      sHdr = " -H \"%s\"".printf(sHeader);
+    }
+
+    string sPkgs = "";
+    if (pkgs != null) {
+      pkgs.foreach( (pkg) => {
+        sPkgs += " --pkg %s".printf(pkg);
+      });
+    }
+
+    string sCmd = "valac --target-glib=2.32%s -C%s \"%s\"".printf(sPkgs, sHdr, sFilename);
+    string sStdOut, sStdErr; int nErr = 0;
+
+    try {
+      bool ok = Process.spawn_command_line_sync(sCmd, out sStdOut, out sStdErr, out nErr);
+
+      if (nErr != 0) {
+        stderr.printf("%s\n", sStdErr);
+      } else {
+        return ok;
       }
-
-      string sCmd = "valac -C -h \"%s\" \"%s\"".printf(sHeader, sFilename);
-      string sStdOut, sStdErr; int nErr = 0;
-
-      try {
-        bool ok = Process.spawn_command_line_sync(sCmd, out sStdOut, out sStdErr, out nErr);
-
-        if (nErr != 0) {
-          stderr.printf("%s\n", sStdErr);
-        } else {
-          return ok;
-        }
-      } catch (Error e) {
-        stderr.printf("%s\n", e.message);
-      }
+    } catch (Error e) {
+      stderr.printf("%s\n", e.message);
     }
     return false;
   }

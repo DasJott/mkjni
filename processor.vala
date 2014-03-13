@@ -43,11 +43,13 @@ public class Processor : GLib.Object
           ok = oJniFiles.createImplementation();
         }
         if (ok) {
-          // we need to be more specific here
-          //oValaFile.compile2C(oClass);
+          ok = oValaFile.compile2C(c.VPackages);
+        }
+        if (ok) {
+          ok = ValaFile.compile2Ccode("*.vala", c.VPackages);
         }
       } else {
-        stdout.printf("Ooops, class is null!\n");
+        stderr.printf("Error retrieving class information\n");
       }
     } catch (Error e) {
       stderr.printf("%s\n", e.message);
