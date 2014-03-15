@@ -40,7 +40,7 @@ public class ValaFile : GLib.Object
     if (m_oFile != null) {
       try {
         Class oClass = new Class(sClassname);
-        oClass.filename = getGenericFilename(m_oFile);
+        oClass.filename = getGenericFilename();
 
         int nOpenBraces = 0;
         bool bIsComment = false, bInClass = false;
@@ -133,7 +133,7 @@ public class ValaFile : GLib.Object
   {
     if (m_oFile != null) {
       string sFilename = m_oFile.get_basename();
-      string sHeader = getGenericFilename(m_oFile) + ".h";
+      string sHeader = getGenericFilename() + ".h";
 
       return compile2Ccode(sFilename, pkgs, sHeader);
     }
@@ -144,26 +144,32 @@ public class ValaFile : GLib.Object
   {
     string sHdr = "";
     if (sHeader != null && sHeader != "") {
-      sHdr = " -H \"%s\"".printf(sHeader);
+      sHdr = " --header=\"%s\"".printf(sHeader);
     }
 
     string sPkgs = "";
     if (pkgs != null) {
       pkgs.foreach( (pkg) => {
-        sPkgs += " --pkg %s".printf(pkg);
+        sPkgs += " --pkg=%s".printf(pkg);
       });
     }
 
-    string sCmd = "valac --target-glib=2.32%s -C%s \"%s\"".printf(sPkgs, sHdr, sFilename);
+    string sDir = Path.get_dirname(sFilename);
+
+    string sCmd = "valac --disable-assert --target-glib=2.32%s -C%s \"%s\"".printf(sPkgs, sHdr, sFilename);
     string sStdOut, sStdErr; int nErr = 0;
 
     try {
-      bool ok = Process.spawn_command_line_sync(sCmd, out sStdOut, out sStdErr, out nErr);
+      string[] argv;
+      bool ok = Shell.parse_argv(sCmd, out argv);
+      if (ok) {
+        ok = Process.spawn_sync(sDir, argv, null, SpawnFlags.SEARCH_PATH, null, out sStdOut, out sStdErr, out nErr);
 
-      if (nErr != 0) {
-        stderr.printf("%s\n", sStdErr);
-      } else {
-        return ok;
+        if (nErr != 0) {
+          stderr.printf("%s\n", sStdErr);
+        } else {
+          return ok;
+        }
       }
     } catch (Error e) {
       stderr.printf("%s\n", e.message);
@@ -205,9 +211,14 @@ public class ValaFile : GLib.Object
     return ok;
   }
 
-  private string getGenericFilename(File oFile)
+  public string getPath()
   {
-    string sBasename = oFile.get_basename();
+    return Path.get_dirname( m_oFile.get_path() );
+  }
+
+  public string getGenericFilename()
+  {
+    string sBasename = m_oFile.get_basename();
     int nPos = sBasename.last_index_of(".");
     if (nPos > 0) {
       return sBasename.slice(0, nPos);

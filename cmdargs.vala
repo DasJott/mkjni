@@ -30,6 +30,9 @@ public class CmdArgs : GLib.Object
   public string Package { private set; get; default="";    } // -j --jns
   public string LibName { private set; get; default="";    } // -l --lib
   public bool   PkgDir  { private set; get; default=false; } // -d
+  public bool   Verbose { private set; get; default=false; } // -v
+  public bool   NotLink { private set; get; default=false; } // -o
+  public bool   UseTmp  { private set; get; default=false; } // -t
 
   public List<string> VPackages = new List<string>();        // -p --pkg
 
@@ -91,6 +94,15 @@ public class CmdArgs : GLib.Object
           case "-d":
             PkgDir = true;
             break;
+          case "-v":
+            Verbose = true;
+            break;
+          case "-o":
+            NotLink = true;
+            break;
+          case "-t":
+            UseTmp = true;
+            break;
           case "?":
           case "-?":
           case "-h":
@@ -106,6 +118,11 @@ public class CmdArgs : GLib.Object
     }
 
     if (checkArgs()) {
+      if (UseTmp) {
+        if (!prepareTmp()) {
+          return false;
+        }
+      }
       return true;
     }
     printHelp();
@@ -126,6 +143,62 @@ public class CmdArgs : GLib.Object
     return false;
   }
 
+  private bool prepareTmp()
+  {
+    try {
+      if (Verbose) { stdout.printf("Create temp directory..."); }
+      string sTmpDir = DirUtils.make_tmp("mkjni-makedir");
+      if (sTmpDir != null) {
+        if (Verbose) { stdout.printf("ok :)\nCopying vala files to temp directory..."); }
+        string sSrcDir = Path.get_dirname(VFile);
+        bool ok = copyValaFiles(sSrcDir, sTmpDir);
+        if (ok) {
+          VFile = Path.build_path(sTmpDir, Path.get_basename(VFile));
+          if (Verbose) { stdout.printf("ok :)\n"); }
+        } else {
+          if (Verbose) { stdout.printf("not ok :(\n"); }
+          stdout.printf("Can not copy to temp directory\n");
+        }
+        return ok;
+      } else {
+        if (Verbose) { stdout.printf("not ok :(\n"); }
+      }
+    } catch (Error e) {
+      if (Verbose) { stdout.printf("not ok :(\n"); }
+      stderr.printf("%s\n", e.message);
+    }
+    return false;
+  }
+
+  /**
+   * copies files with .vala suffix from sSrcDir to sDstDir
+   */
+  private bool copyValaFiles(string sSrcDir, string sDstDir)
+  {
+    try {
+      var oSrcDir = File.new_for_path(sSrcDir);
+      FileEnumerator e = oSrcDir.enumerate_children(GLib.FileAttribute.STANDARD_NAME, GLib.FileQueryInfoFlags.NONE);
+
+      FileInfo info = null;
+      while ( (info = e.next_file()) != null ) {
+        if (info.get_file_type () == FileType.REGULAR && info.get_name().has_suffix(".vala")) {
+          var src = File.new_for_path( Path.build_path(sSrcDir, info.get_name()) );
+          var dst = File.new_for_path( Path.build_path(sDstDir, info.get_name()) );
+
+          bool ok = src.copy(dst, FileCopyFlags.OVERWRITE);
+          if (!ok) {
+            stderr.printf("Error copying file \"%s\"\n", info.get_name());
+          }
+        }
+      }
+      // TODO: Copy vala files to tmp dir
+      return true;
+    } catch (Error e) {
+      stderr.printf("%s\n", e.message);
+    }
+    return false;
+  }
+
   public void printHelp()
   {
     stderr.printf("\n");
@@ -135,9 +208,9 @@ public class CmdArgs : GLib.Object
     stderr.printf("\n");
     stderr.printf("---- Must-have parameters: ----\n");
     stderr.printf("\n");
-    stderr.printf("-f, --file <vala file>    A valid vala file to start with\n");
+    stderr.printf("-f, --file <vala file>    The Vala file containing the class\n");
     stderr.printf("\n");
-    stderr.printf("-c, --class <class name>  A class within the vala file to generate the jni from\n");
+    stderr.printf("-c, --class <class name>  The Vala class to generate the jni from\n");
     stderr.printf("\n");
     stderr.printf("-l, --lib <lib name>      Please specify the desired name of the library\n");
     stderr.printf("                          The name is w/o lib prefix and .so suffix!\n");
@@ -149,6 +222,12 @@ public class CmdArgs : GLib.Object
     stderr.printf("-j, --jns <package>       The Java namespace (package) to be created\n");
     stderr.printf("\n");
     stderr.printf("-d                        Create Java file in package directory\n");
+    stderr.printf("\n");
+    stderr.printf("-o                        Only compile, do not link\n");
+    stderr.printf("\n");
+    stderr.printf("-t                        Use tmp directory for processing (not implemented yet!)\n");
+    stderr.printf("\n");
+    stderr.printf("-v                        Verbose - tell what's going on\n");
     stderr.printf("\n");
     stderr.printf("-h, --help, -?, ?         Show this help\n");
     stderr.printf("\n");

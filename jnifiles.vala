@@ -44,9 +44,9 @@ public class JNIFiles : GLib.Object
   public string fileNameHeader { owned get { return classPath + ".h"; } }
   public string fileNameImpl   { owned get { return classPath + ".c"; } }
 
-  public bool createHeader()
+  public bool createHeader(string sDir=".")
   {
-    File oFile = getFile(fileNameHeader);
+    File oFile = getFile(Path.build_path(sDir, fileNameHeader));
 
     if (oFile != null) {
       try {
@@ -87,9 +87,9 @@ public class JNIFiles : GLib.Object
     return false;
   }
 
-  public bool createImplementation()
+  public bool createImplementation(string sDir=".")
   {
-    File oFile = getFile(fileNameImpl);
+    File oFile = getFile(Path.build_path(sDir, fileNameImpl));
 
     if (oFile != null) {
       try {

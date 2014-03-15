@@ -29,34 +29,78 @@ public class Processor : GLib.Object
     bool ok = false;
 
     try {
+      if (c.Verbose) { stdout.printf("Parsing vala file..."); }
       var oValaFile = new ValaFile(c.VFile);
       Class oClass = oValaFile.parse(c.VClass);
       if (oClass != null) {
+
+        if (c.Verbose) { stdout.printf("ok!\nCreating Java file..."); }
         var oJavaFile = new JavaFile(c.LibName);
         ok = oJavaFile.create(oClass, c.Package, c.PkgDir);
+        if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
+
         JNIFiles oJniFiles = null;
         if (ok) {
+          if (c.Verbose) { stdout.printf("Creating JNI header..."); }
           oJniFiles = new JNIFiles(oClass, c.Package);
           ok = oJniFiles.createHeader();
+          if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
         }
         if (ok) {
+          if (c.Verbose) { stdout.printf("Creating JNI implementation..."); }
           ok = oJniFiles.createImplementation();
+          if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
         }
+
         if (ok) {
+          if (c.Verbose) { stdout.printf("Make C code from Vala code..."); }
+          string sValaFiles = oValaFile.getPath() + "*.vala";
+          ok = ValaFile.compile2Ccode(sValaFiles, c.VPackages);
+          if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
+        }
+
+        if (ok) {
+          if (c.Verbose) { stdout.printf("Connect Vala and Java..."); }
           ok = oValaFile.compile2C(c.VPackages);
+          if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
         }
+
         if (ok) {
-          ok = ValaFile.compile2Ccode("*.vala", c.VPackages);
+          if (c.Verbose) { stdout.printf("Compiling sources..."); }
+          var oGcc = new Compiler(oValaFile.getPath());
+          ok = oGcc.compile(c.VPackages);
+          if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
+
+          if (!c.NotLink) {
+            if (c.Verbose) { stdout.printf("Link objects to \"lib%s.so\"...", c.LibName); }
+            ok = oGcc.link(c.LibName, c.VPackages);
+            if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
+          }
+        }
+
+        if (ok && c.UseTmp) {
+          if (c.Verbose) { stdout.printf("Copying results from tmp..."); }
+
+
+
+          if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
+        }
+
+        if (!ok) {
+          if (c.Verbose) { stdout.printf("not ok :(\n"); }
+        } else {
+          stdout.printf("\nFinished successfully :)\n");
         }
       } else {
         stderr.printf("Error retrieving class information\n");
       }
     } catch (Error e) {
-      stderr.printf("%s\n", e.message);
+      stderr.printf("\nERROR:\n%s\n", e.message);
       ok = false;
     }
 
     return ok;
   }
+
 }
 

@@ -24,42 +24,44 @@
 
 public class Compiler : GLib.Object
 {
-  private List<string> m_oPackages = null;
+  private string m_sWorkingDir = null;
 
-  public Compiler(string sLibName, List<string> pkgs)
+  public Compiler(string sWorkDir)
   {
-    LibName = sLibName;
-    m_oPackages = pkgs.copy();
+    m_sWorkingDir = sWorkDir;
   }
 
-  public bool compile()
+  public bool compile(List<string> pkgs)
   {
-    return cmd( "gcc -c -fPIC $(pkg-config --cflags glib-2.0%s) -I%s *.c".printf(Packages, JniHeaderPath) );
+    return cmd( "gcc -c -fPIC $(pkg-config --cflags glib-2.0%s) -I%s *.c".printf(getPackages(pkgs), JniHeaderPath) );
   }
 
-  public bool link()
+  public bool link(string sLibName, List<string> pkgs)
   {
-    return cmd( "gcc -w -shared -o lib%s.so *.o $(pkg-config --libs --static glib-2.0%s)".printf(LibName, Packages) );
+    return cmd( "gcc -w -shared -o lib%s.so *.o $(pkg-config --libs --static glib-2.0%s)".printf(LibName, getPackages(pkgs)) );
   }
 
-  public bool make()
+  public bool make(string sLibName, List<string> pkgs)
   {
-    return cmd( "gcc -fPIC -shared -o lib%s.so $(pkg-config --cflags --libs --static glib-2.0%s) -I%s *.c".printf(LibName, Packages, JniHeaderPath) );
+    return cmd( "gcc -fPIC -shared -o lib%s.so $(pkg-config --cflags --libs --static glib-2.0%s) -I%s *.c".printf(LibName, getPackages(pkgs), JniHeaderPath) );
+  }
+
+  public bool clean()
+  {
+    return cmd( "rm -f *.o lib%s.so".printf(LibName) );
   }
 
   private string LibName { get; private set; }
 
   // gets packages string
-  private string Packages
+  private string getPackages(List<string> pkgs)
   {
-    owned get {
-      string res = "";
-      m_oPackages.foreach( (pkg) => {
-        res += " ";
-        res += pkg;
-      });
-      return res;
-    }
+    string res = "";
+    pkgs.foreach( (pkg) => {
+      res += " ";
+      res += pkg;
+    });
+    return res;
   }
 
   // gets the path to jni.h
@@ -72,11 +74,8 @@ public class Compiler : GLib.Object
           string[] asPaths = sFind.split("\n");
           foreach (string sPath in asPaths) {
             if (sPath.has_suffix("/jni.h")) {
-              int nPos = sPath.last_index_of("/");
-              if (nPos > 0) {
-                m_jni_header_path = sPath.slice(0, nPos);
-                break;
-              }
+              m_jni_header_path = Path.get_dirname(sPath);
+              break;
             }
           }
         }
@@ -90,13 +89,20 @@ public class Compiler : GLib.Object
   {
     string sStdErr; int nErr = 0;
     try {
-      bool ok = Process.spawn_command_line_sync(sCmd, out sStdOut, out sStdErr, out nErr);
+      string[] argv;
+      bool ok = Shell.parse_argv(sCmd, out argv);
+      if (ok) {
+        ok = Process.spawn_sync(m_sWorkingDir, argv, null, SpawnFlags.SEARCH_PATH, null, out sStdOut, out sStdErr, out nErr);
 
-      if (nErr != 0) {
-        stderr.printf("%s\n", sStdErr);
+        if (nErr != 0) {
+          stderr.printf("%s\n", sStdErr);
+        } else {
+          return ok;
+        }
       } else {
-        return ok;
+        stderr.printf("Error parsing command line\n");
       }
+
     } catch (Error e) {
       stderr.printf("%s\n", e.message);
     }
