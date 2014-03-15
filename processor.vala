@@ -81,7 +81,9 @@ public class Processor : GLib.Object
         if (ok && c.UseTmp) {
           if (c.Verbose) { stdout.printf("Copying results from tmp..."); }
 
-
+          var oLibSrc = File.new_for_path( Path.build_path(oValaFile.getPath(), c.LibName) );
+          var oLibDst = File.new_for_path( Path.build_path(".", c.LibName) );
+          oLibSrc.copy(oLibDst, FileCopyFlags.OVERWRITE);
 
           if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
         }

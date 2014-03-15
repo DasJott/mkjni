@@ -102,7 +102,6 @@ public class Compiler : GLib.Object
       } else {
         stderr.printf("Error parsing command line\n");
       }
-
     } catch (Error e) {
       stderr.printf("%s\n", e.message);
     }

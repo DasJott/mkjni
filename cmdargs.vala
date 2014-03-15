@@ -24,6 +24,8 @@
 
 public class CmdArgs : GLib.Object
 {
+  private string m_sTmpDir = null;
+
   public string AppName { private set; get; default="";    }
   public string VFile   { private set; get; default="";    } // -f --file
   public string VClass  { private set; get; default="";    } // -c --class
@@ -147,7 +149,7 @@ public class CmdArgs : GLib.Object
   {
     try {
       if (Verbose) { stdout.printf("Create temp directory..."); }
-      string sTmpDir = DirUtils.make_tmp("mkjni-makedir");
+      string sTmpDir = getTmpDir();
       if (sTmpDir != null) {
         if (Verbose) { stdout.printf("ok :)\nCopying vala files to temp directory..."); }
         string sSrcDir = Path.get_dirname(VFile);
@@ -168,6 +170,49 @@ public class CmdArgs : GLib.Object
       stderr.printf("%s\n", e.message);
     }
     return false;
+  }
+
+  private string getTmpDir() throws Error
+  {
+    if (m_sTmpDir == null) {
+      m_sTmpDir = DirUtils.make_tmp("mkjni-makedir");
+      cleanUp();
+    }
+    return m_sTmpDir;
+  }
+
+  public bool cleanUp(bool bDeleteTmpFolder=false)
+  {
+    if (m_sTmpDir != null) {
+
+      var oDir = File.new_for_path(m_sTmpDir);
+      if (oDir.query_exists()) {
+        try {
+          FileEnumerator e = oDir.enumerate_children(GLib.FileAttribute.STANDARD_NAME, GLib.FileQueryInfoFlags.NONE);
+
+          FileInfo info = null;
+          while ( (info = e.next_file()) != null ) {
+            try {
+              var oFile = File.new_for_path( Path.build_path(m_sTmpDir, info.get_name()) );
+              oFile.delete();
+            } catch (Error e) {
+            }
+          }
+          e.unref();
+          if (bDeleteTmpFolder) {
+            try {
+              oDir.delete();
+            } catch (Error e) {
+            }
+          }
+        } catch (Error e) {
+          stderr.printf("%s\n", e.message);
+        }
+      }
+
+    }
+
+    return true;
   }
 
   /**
@@ -191,7 +236,7 @@ public class CmdArgs : GLib.Object
           }
         }
       }
-      // TODO: Copy vala files to tmp dir
+      e.unref();
       return true;
     } catch (Error e) {
       stderr.printf("%s\n", e.message);
@@ -225,7 +270,7 @@ public class CmdArgs : GLib.Object
     stderr.printf("\n");
     stderr.printf("-o                        Only compile, do not link\n");
     stderr.printf("\n");
-    stderr.printf("-t                        Use tmp directory for processing (not implemented yet!)\n");
+    stderr.printf("-t                        Use tmp directory for processing\n");
     stderr.printf("\n");
     stderr.printf("-v                        Verbose - tell what's going on\n");
     stderr.printf("\n");
