@@ -1,29 +1,32 @@
-mkjni
+# mkjni
 =====
 
-Call Vala code from Java
+## Call Vala code from Java
 
-You can write libraries in Vala to be used from Java to speed up parts of that slow language.
-Simply specify the vala file and the class within it to be made "public" to the Java code.
-This tool will create the Java and the C files you need to compile a JNI library to be called from Java.
+Vala code might be faster or just better to write orsimply more beautiful.
+Write some functionality in Vala, specify a class you want to "export" to Java and mkjni creates a jni lib and the Java Class for you.
+So it feels like you could call the Vala class from Java!
 
-By now you must only use string, int or void as parameters and return types.
+## Limitations:
+**Parameters and return types must be string, int, bool ot void!**
 
-The arguments for mkjni are to be specified as follows:
+## Usage
+  **mkjni [PARAMS][OPTIONS] <FILE(S)>**
 
-Must-have:
+### Params (must-have):
 
--f, --file <vala file>    A valid vala file to start with
 -c, --class <class name>  A class within the vala file to generate the jni from
 -l, --lib <lib name>      Please specify the desired name of the library
                           The name is w/o lib prefix and .so suffix!
 
 
-Options:
+### Options:
 
 -p, --pkg <package>       Packages to be included (Vala --pkg and pkg-config)
 -j, --jns <package>       The Java namespace (package) to be created
+-cc <compiler>            The compiler to be used (default: gcc)
 -d                        Create Java file in package directory
+-n                        Not compile, just generate files
 -o                        Only compile, do not link
 -t                        Use tmp directory for processing
 -v                        Verbose - tell what's going on
@@ -31,15 +34,15 @@ Options:
 -h, --help                for showing help
 
 
-Note: mkjni creates all files (and directories for java packages) in the directory where it is called.
+**Note: mkjni creates all files (and directories for java packages) in the directory where it is called.**
 
-Example:
+## Example:
 
-  mkjni -v -t -f myclass.vala -c MyClass -j de.dasjott.myclass -l superjni
+  **mkjni -v -t -c MyClass -j de.dasjott.myclass -l superjni *.vala**
 
 You should be provided with a result like libsuperjni.so for this example and a Java file MyClass.java in your current directory.
 
-
+## Bugs
 If you find bugs, don't feed them, so they'll die over time.
 You could as well fix them yourself, as you have the code.
 Or you just call me to come by to squish them. Maybe I will ;)
