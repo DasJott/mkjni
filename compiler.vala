@@ -87,6 +87,7 @@ public class Compiler
     get {
       if (m_jni_header_path == "") {
         string sFind;
+        // TODO: Make this OS independent
         if ( cmd("find /usr/lib -name \"jni.h\"", out sFind) ) {
           string[] asPaths = sFind.split("\n");
           foreach (string sPath in asPaths) {
