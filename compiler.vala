@@ -22,7 +22,7 @@
  */
 
 
-public class Compiler : GLib.Object
+public class Compiler
 {
   private string m_sWorkingDir = null;
 
@@ -33,25 +33,40 @@ public class Compiler : GLib.Object
 
   public bool compile(List<string> pkgs)
   {
-    return cmd( "gcc -c -fPIC $(pkg-config --cflags glib-2.0%s) -I%s *.c".printf(getPackages(pkgs), JniHeaderPath) );
+    // never change these command lines!
+    string sPkgConfig;
+    bool ok = cmd( "pkg-config --cflags glib-2.0 gobject-2.0%s".printf(getPackages(pkgs)), out sPkgConfig);
+    if (ok) {
+      ok = cmd( "gcc -fPIC -c %s -I%s *.c".printf(sPkgConfig, JniHeaderPath) );
+    }
+    return ok;
   }
 
   public bool link(string sLibName, List<string> pkgs)
   {
-    return cmd( "gcc -w -shared -o lib%s.so *.o $(pkg-config --libs --static glib-2.0%s)".printf(LibName, getPackages(pkgs)) );
+    // never change these command lines!
+    string sPkgConfig;
+    bool ok = cmd( "pkg-config --libs --static glib-2.0 gobject-2.0%s".printf(getPackages(pkgs)), out sPkgConfig);
+    if (ok) {
+      ok = cmd( "gcc -w -shared -o lib%s.so *.o %s".printf(sLibName, sPkgConfig) );
+    }
+    return ok;
   }
 
   public bool make(string sLibName, List<string> pkgs)
   {
-    return cmd( "gcc -fPIC -shared -o lib%s.so $(pkg-config --cflags --libs --static glib-2.0%s) -I%s *.c".printf(LibName, getPackages(pkgs), JniHeaderPath) );
+    string sPkgConfig;
+    bool ok = cmd( "pkg-config --cflags --libs --static glib-2.0 gobject-2.0%s".printf(getPackages(pkgs)), out sPkgConfig );
+    if (ok) {
+      ok = cmd( "gcc -fPIC -shared -o lib%s.so %s -I%s *.c".printf(sLibName, sPkgConfig, JniHeaderPath) );
+    } return ok;
   }
 
   public bool clean()
   {
-    return cmd( "rm -f *.o lib%s.so".printf(LibName) );
+    //return cmd( "rm -f *.o lib%s.so".printf(LibName) );
+    return false;
   }
-
-  private string LibName { get; private set; }
 
   // gets packages string
   private string getPackages(List<string> pkgs)
@@ -87,25 +102,10 @@ public class Compiler : GLib.Object
 
   private bool cmd(string sCmd, out string sStdOut=null)
   {
-    string sStdErr; int nErr = 0;
-    try {
-      string[] argv;
-      bool ok = Shell.parse_argv(sCmd, out argv);
-      if (ok) {
-        ok = Process.spawn_sync(m_sWorkingDir, argv, null, SpawnFlags.SEARCH_PATH, null, out sStdOut, out sStdErr, out nErr);
-
-        if (nErr != 0) {
-          stderr.printf("%s\n", sStdErr);
-        } else {
-          return ok;
-        }
-      } else {
-        stderr.printf("Error parsing command line\n");
-      }
-    } catch (Error e) {
-      stderr.printf("%s\n", e.message);
-    }
-    return false;
+    var shell = new Sys();
+    bool ok = shell.spawn_cmd(m_sWorkingDir, sCmd);
+    sStdOut = shell.StdOut;
+    return ok;
   }
 }
 

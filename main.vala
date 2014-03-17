@@ -22,7 +22,7 @@
  */
 
 
-class Main : GLib.Object
+class Main
 {
   public static int main(string[] args)
   {
@@ -48,17 +48,18 @@ class Main : GLib.Object
     try {
       MatchInfo info;
 
-      var regParam = new Regex("^ *((ref|out)? *)([a-zA-Z0-9]+) +([a-zA-Z0-9_]+)$");
+      var regWildcard = new Regex("^([^\\*]*)(\\*+)(.*)$");
 
       string[] ss = new string[] {
-        "Class oClass",
-        "out Class oClass",
+        "valac",
+        "lib*.so",
+        "*.vala",
       };
 
       foreach (string s in ss) {
         stdout.printf("# \"%s\"\n", s);
 
-        if ( regParam.match(s, 0, out info) ) {
+        if ( regWildcard.match(s, 0, out info) ) {
           stdout.printf("Match!\n");
           for (int i=0; i<info.get_match_count(); ++i) {
             stdout.printf("%i: \"%s\"\n", i, info.fetch(i));

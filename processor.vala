@@ -22,7 +22,7 @@
  */
 
 
-public class Processor : GLib.Object
+public class Processor
 {
   public bool run(CmdArgs c)
   {

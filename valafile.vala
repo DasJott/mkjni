@@ -132,7 +132,7 @@ public class ValaFile : GLib.Object
   public bool compile2C(List<string>? pkgs=null)
   {
     if (m_oFile != null) {
-      string sFilename = m_oFile.get_basename();
+      string sFilename = m_oFile.get_path();
       string sHeader = getGenericFilename() + ".h";
 
       return compile2Ccode(sFilename, pkgs, sHeader);
@@ -144,7 +144,7 @@ public class ValaFile : GLib.Object
   {
     string sHdr = "";
     if (sHeader != null && sHeader != "") {
-      sHdr = " --header=\"%s\"".printf(sHeader);
+      sHdr = " --header=%s".printf(sHeader);
     }
 
     string sPkgs = "";
@@ -154,27 +154,13 @@ public class ValaFile : GLib.Object
       });
     }
 
-    string sDir = Path.get_dirname(sFilename);
+    string sDir  = Path.get_dirname(sFilename);
+    string sFile = Path.get_basename(sFilename);
 
-    string sCmd = "valac --disable-assert --target-glib=2.32%s -C%s \"%s\"".printf(sPkgs, sHdr, sFilename);
-    string sStdOut, sStdErr; int nErr = 0;
+    string sCmd = "valac --disable-assert --target-glib=2.32%s -C%s %s".printf(sPkgs, sHdr, sFile);
 
-    try {
-      string[] argv;
-      bool ok = Shell.parse_argv(sCmd, out argv);
-      if (ok) {
-        ok = Process.spawn_sync(sDir, argv, null, SpawnFlags.SEARCH_PATH, null, out sStdOut, out sStdErr, out nErr);
-
-        if (nErr != 0) {
-          stderr.printf("%s\n", sStdErr);
-        } else {
-          return ok;
-        }
-      }
-    } catch (Error e) {
-      stderr.printf("%s\n", e.message);
-    }
-    return false;
+    var shell = new Sys();
+    return shell.spawn_cmd(sDir, sCmd);
   }
 
   private bool setParameters(string sParams, ref List<Class.Method.Parameter> oParams)
@@ -213,7 +199,11 @@ public class ValaFile : GLib.Object
 
   public string getPath()
   {
-    return Path.get_dirname( m_oFile.get_path() );
+    string sPath = Path.get_dirname( m_oFile.get_path() );
+    if (!sPath.has_suffix("/")) {
+      sPath += "/";
+    }
+    return sPath;
   }
 
   public string getGenericFilename()
