@@ -14,9 +14,7 @@ The arguments for mkjni are to be specified as follows:
 Must-have:
 
 -f, --file <vala file>    A valid vala file to start with
-
 -c, --class <class name>  A class within the vala file to generate the jni from
-
 -l, --lib <lib name>      Please specify the desired name of the library
                           The name is w/o lib prefix and .so suffix!
 
@@ -24,22 +22,19 @@ Must-have:
 Options:
 
 -p, --pkg <package>       Packages to be included (Vala --pkg and pkg-config)
-
 -j, --jns <package>       The Java namespace (package) to be created
+-d                        Create Java file in package directory
+-o                        Only compile, do not link
+-t                        Use tmp directory for processing
+-v                        Verbose - tell what's going on
 
--h, --help for showing help
+-h, --help                for showing help
 
 
 Note: mkjni creates all files (and directories for java packages) in the directory where it is called.
 
 Example:
 
-  mkjni -f myclass.vala -c MyClass -p de.dasjott.myclass -l superjni
+  mkjni -v -t -f myclass.vala -c MyClass -j de.dasjott.myclass -l superjni
 
-
-After the files are generated you can compile your lib which is included by the java class:
-
-  gcc -shared -fPIC $(pkg-config --cflags --libs glib-2.0) -I/usr/lib/jvm/java-1.7.0-openjdk-amd64/include -olibsuperjni.so myclass.c de_dasjott_myclass_MyClass.c
-
-while the -I parameter has to specify the directory where to find the jni.h!
-
+You should be provided with a result like libsuperjni.so for this example and a Java file MyClass.java in your current directory.
