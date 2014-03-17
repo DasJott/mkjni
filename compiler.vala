@@ -33,7 +33,7 @@ public class Compiler
     m_sWorkingDir = sWorkDir;
   }
 
-  public bool compile(List<string> pkgs)
+  public bool compile(string[] pkgs)
   {
     // never change these command lines!
     string sPkgConfig;
@@ -44,7 +44,7 @@ public class Compiler
     return ok;
   }
 
-  public bool link(string sLibName, List<string> pkgs)
+  public bool link(string sLibName, string[] pkgs)
   {
     // never change these command lines!
     string sPkgConfig;
@@ -55,7 +55,7 @@ public class Compiler
     return ok;
   }
 
-  public bool make(string sLibName, List<string> pkgs)
+  public bool make(string sLibName, string[] pkgs)
   {
     string sPkgConfig;
     bool ok = cmd( "pkg-config --cflags --libs --static glib-2.0 gobject-2.0%s".printf(getPackages(pkgs)), out sPkgConfig );
@@ -71,13 +71,13 @@ public class Compiler
   }
 
   // gets packages string
-  private string getPackages(List<string> pkgs)
+  private string getPackages(string[] pkgs)
   {
     string res = "";
-    pkgs.foreach( (pkg) => {
+    foreach (string pkg in pkgs) {
       res += " ";
       res += pkg;
-    });
+    }
     return res;
   }
 

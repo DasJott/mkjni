@@ -49,12 +49,13 @@ public class Sys : GLib.Object
         string sStdOut, sStdError; int nErrorCode;
         ok = Process.spawn_sync(sDir, argv, m_environment, SpawnFlags.SEARCH_PATH, null, out sStdOut, out sStdError, out nErrorCode);
 
+        StdOut    = sStdOut;
+        StdError  = sStdError;
+        ErrorCode = nErrorCode;
+
         if (ErrorCode != 0) {
           stderr.printf("%s\n", StdError);
         } else {
-          StdOut    = sStdOut;
-          StdError  = sStdError;
-          ErrorCode = nErrorCode;
           return ok;
         }
       }

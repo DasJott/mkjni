@@ -27,7 +27,6 @@ public class CmdArgs : GLib.Object
   private string m_sTmpDir = null;
 
   public string AppName { private set; get; default="";    }
-  public string VFile   { private set; get; default="";    } // -f --file
   public string VClass  { private set; get; default="";    } // -c --class
   public string Package { private set; get; default="";    } // -j --jns
   public string LibName { private set; get; default="";    } // -l --lib
@@ -38,7 +37,11 @@ public class CmdArgs : GLib.Object
   public bool   NotLink { private set; get; default=false; } // -o
   public bool   UseTmp  { private set; get; default=false; } // -t
 
-  public List<string> VPackages = new List<string>();        // -p --pkg
+  public string[] VFiles    { get { return m_asVFiles;   } } // <FILE(S)>
+  public string[] VPackages { get { return m_asVPackages;} } // -p --pkg
+
+  private string[] m_asVFiles    = {};
+  private string[] m_asVPackages = {};
 
   private CmdArgs() {}
 
@@ -64,22 +67,17 @@ public class CmdArgs : GLib.Object
     for (int i=1; i<args.length; ++i) {
       if (opt != null) {
         switch (opt) {
-          case "f":  VFile   = args[i]; break;
           case "c":  VClass  = args[i]; break;
           case "j":  Package = args[i]; break;
           case "l":  LibName = args[i]; break;
           case "cc": Compler = args[i]; break;
           case "p":
-            VPackages.append( args[i] );
+            m_asVPackages += args[i];
             break;
         }
         opt = null;
       } else {
         switch (args[i]) {
-          case "-f":
-          case "--file":
-            opt = "f";
-            break;
           case "-c":
           case "--class":
             opt = "c";
@@ -121,9 +119,8 @@ public class CmdArgs : GLib.Object
             printHelp();
             return false;
           default:
-            stderr.printf("Unknown option %s\n", args[i]);
-            printHelp();
-            return false;
+            m_asVFiles += args[i];
+            break;
         }
       }
     }
@@ -144,9 +141,9 @@ public class CmdArgs : GLib.Object
   {
     if (
          AppName != ""
-      && VFile   != ""
       && VClass  != ""
       && LibName != ""
+      && VFiles.length > 0
     ) {
       return true;
     }
@@ -161,12 +158,9 @@ public class CmdArgs : GLib.Object
       string sTmpDir = getTmpDir();
       if (sTmpDir != null) {
         if (Verbose) { stdout.printf("ok :)\nCopying vala files to temp directory..."); }
-        string sSrcDir = Path.get_dirname(VFile);
-        bool ok = copyValaFiles(sSrcDir, sTmpDir);
-        if (ok) {
-          VFile = Path.build_filename(sTmpDir, Path.get_basename(VFile));
-          if (Verbose) { stdout.printf("ok :)\n"); }
-        } else {
+        bool ok = copyFiles(VFiles, sTmpDir);
+        if (ok && Verbose) { stdout.printf("ok :)\n"); }
+        if (!ok) {
           if (Verbose) { stdout.printf("not ok :(\n"); }
           stdout.printf("Can not copy to temp directory\n");
         }
@@ -225,32 +219,31 @@ public class CmdArgs : GLib.Object
   }
 
   /**
-   * copies files with .vala suffix from sSrcDir to sDstDir
+   * copies files to sDstDir
    */
-  private bool copyValaFiles(string sSrcDir, string sDstDir)
+  private bool copyFiles(string[] asFiles, string sDstDir)
   {
-    try {
-      var oSrcDir = File.new_for_path(sSrcDir);
-      FileEnumerator e = oSrcDir.enumerate_children(GLib.FileAttribute.STANDARD_NAME, GLib.FileQueryInfoFlags.NONE);
+    int i=0;
+    foreach (string sFile in asFiles) {
+      var src = File.new_for_path( sFile );
+      var dst = File.new_for_path( Path.build_filename(sDstDir, Path.get_basename(sFile)) );
 
-      FileInfo info = null;
-      while ( (info = e.next_file()) != null ) {
-        if (info.get_file_type () == FileType.REGULAR && info.get_name().has_suffix(".vala")) {
-          var src = File.new_for_path( Path.build_filename(sSrcDir, info.get_name()) );
-          var dst = File.new_for_path( Path.build_filename(sDstDir, info.get_name()) );
-
-          bool ok = src.copy(dst, FileCopyFlags.NONE);
-          if (!ok) {
-            stderr.printf("Error copying file \"%s\"\n", info.get_name());
-          }
+      try {
+        bool ok = src.copy(dst, FileCopyFlags.NONE);
+        if (ok) {
+          asFiles[i] = dst.get_path();
+        } else {
+          stderr.printf("Error copying file \"%s\"\n", sFile);
+          return false;
         }
+      } catch (Error e) {
+        stderr.printf("%s\n", e.message);
+        return false;
       }
-
-      return true;
-    } catch (Error e) {
-      stderr.printf("%s\n", e.message);
+      ++i;
     }
-    return false;
+
+    return true;
   }
 
   public void printHelp()
@@ -258,11 +251,9 @@ public class CmdArgs : GLib.Object
     stderr.printf("\n");
     stderr.printf("-- %s - make jni files from vala --\n", AppName);
     stderr.printf("\n");
-    stderr.printf("usage: %s [PARAMS][OPTIONS]\n", AppName);
+    stderr.printf("usage: %s [PARAMS][OPTIONS] <FILE(S)>\n", AppName);
     stderr.printf("\n");
     stderr.printf("---- Must-have parameters: ----\n");
-    stderr.printf("\n");
-    stderr.printf("-f, --file <vala file>    The Vala file containing the class\n");
     stderr.printf("\n");
     stderr.printf("-c, --class <class name>  The Vala class to generate the jni from\n");
     stderr.printf("\n");

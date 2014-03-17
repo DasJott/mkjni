@@ -29,12 +29,21 @@ public class Processor : GLib.Object
     bool ok = false;
 
     try {
-      if (c.Verbose) { stdout.printf("Parsing vala file..."); }
-      var oValaFile = new ValaFile(c.VFile);
-      Class oClass = oValaFile.parse(c.VClass);
-      if (oClass != null) {
+      if (c.Verbose) { stdout.printf("Getting vala class..."); }
+      Class oClass = null;
+      ValaFile oValaFile = null;
+      foreach (string sVFile in c.VFiles) {
+        ValaFile oTmpFile = new ValaFile(sVFile);
+        Class oTmpClass = oTmpFile.parse(c.VClass);
+        if (oTmpClass != null) {
+          oClass = oTmpClass;
+          oValaFile = oTmpFile;
+          break;
+        }
+      }
 
-        if (c.Verbose) { stdout.printf("ok!\nCreating Java file..."); }
+      if (oClass != null) {
+        if (c.Verbose) { stdout.printf("ok :)\nCreating Java file..."); }
         var oJavaFile = new JavaFile(c.LibName);
         ok = oJavaFile.create(oClass, c.Package, c.PkgDir);
         if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
@@ -54,14 +63,7 @@ public class Processor : GLib.Object
 
         if (ok) {
           if (c.Verbose) { stdout.printf("Make C code from Vala code..."); }
-          string sValaFiles = oValaFile.getPath() + "*.vala";
-          ok = ValaFile.compile2Ccode(sValaFiles, c.VPackages);
-          if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
-        }
-
-        if (ok) {
-          if (c.Verbose) { stdout.printf("Connect Vala and Java..."); }
-          ok = oValaFile.compile2C(c.VPackages);
+          ok = ValaFile.compile2Ccode(oValaFile.getPath(), c.VFiles, c.VPackages, oValaFile.getHeaderName());
           if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
         }
 

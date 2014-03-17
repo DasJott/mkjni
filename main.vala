@@ -34,6 +34,8 @@ class Main
     if (oArgs != null) {
       var oProc = new Processor();
       ok = oProc.run(oArgs);
+    } else {
+      stderr.printf("Error parsing command line\n");
     }
 
     if (ok) {
