@@ -2,9 +2,9 @@
 
 ## Call Vala code from Java
 
-Vala code might be faster or just better to write orsimply more beautiful.
-Write some functionality in Vala, specify a class you want to "export" to Java and mkjni creates a jni lib and the Java Class for you.
-So it feels like you could call the Vala class from Java!
+Vala code might be faster or just better to write orsimply more beautiful.<br/>
+Write some functionality in Vala, specify a class you want to "export" to Java and mkjni creates a jni lib and the Java Class for you.<br/>
+So it feels like you could call the Vala class from Java!<br/>
 
 ## Limitations:
 **Parameters and return types must be string, int, bool ot void!**
@@ -17,8 +17,7 @@ So it feels like you could call the Vala class from Java!
 Parameter                      | Description
 ------------------------------ | -----------------------------------------------------
 -c, --class &lt;class name&gt; | A class within the vala file to generate the jni from
--l, --lib &lt;lib name&gt;     | Please specify the desired name of the library
-                               | The name is w/o lib prefix and .so suffix!
+-l, --lib &lt;lib name&gt;     | Please specify the desired name of the library<br/>The name is w/o lib prefix and .so suffix!
 
 ### Options:
 
@@ -44,6 +43,6 @@ Option                         | Description
 You should be provided with a result like libsuperjni.so for this example and a Java file MyClass.java in your current directory.
 
 ## Bugs
-If you find bugs, don't feed them, so they'll die over time.
-You could as well fix them yourself, as you have the code.
-Or you just call me to come by to squish them. Maybe I will ;)
+If you find bugs, don't feed them, so they'll die over time.<br/>
+You could as well fix them yourself, as you have the code.<br/>
+Or you just call me to come by to squish them. Maybe I will ;)<br/>
