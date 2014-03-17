@@ -46,7 +46,7 @@ public class JNIFiles : GLib.Object
 
   public bool createHeader(string sDir=".")
   {
-    File oFile = getFile(Path.build_path(sDir, fileNameHeader));
+    File oFile = getFile(Path.build_filename(sDir, fileNameHeader));
 
     if (oFile != null) {
       try {
@@ -89,7 +89,7 @@ public class JNIFiles : GLib.Object
 
   public bool createImplementation(string sDir=".")
   {
-    File oFile = getFile(Path.build_path(sDir, fileNameImpl));
+    File oFile = getFile(Path.build_filename(sDir, fileNameImpl));
 
     if (oFile != null) {
       try {

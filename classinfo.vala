@@ -22,7 +22,7 @@
  */
 
 
-public class Class
+public class Class : GLib.Object
 {
   public Class(string sName) { name = sName; }
   public string name = "";

@@ -22,7 +22,7 @@
  */
 
 
-public class Processor
+public class Processor : GLib.Object
 {
   public bool run(CmdArgs c)
   {
@@ -43,12 +43,12 @@ public class Processor
         if (ok) {
           if (c.Verbose) { stdout.printf("Creating JNI header..."); }
           oJniFiles = new JNIFiles(oClass, c.Package);
-          ok = oJniFiles.createHeader();
+          ok = oJniFiles.createHeader(oValaFile.getPath());
           if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
         }
         if (ok) {
           if (c.Verbose) { stdout.printf("Creating JNI implementation..."); }
-          ok = oJniFiles.createImplementation();
+          ok = oJniFiles.createImplementation(oValaFile.getPath());
           if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
         }
 
@@ -81,12 +81,16 @@ public class Processor
         if (ok && c.UseTmp) {
           if (c.Verbose) { stdout.printf("Copying results from tmp..."); }
 
-          var oLibSrc = File.new_for_path( Path.build_path(oValaFile.getPath(), c.LibName) );
-          var oLibDst = File.new_for_path( Path.build_path(".", c.LibName) );
+          string sLibName = "lib%s.so".printf(c.LibName);
+
+          var oLibSrc = File.new_for_path( Path.build_filename(oValaFile.getPath(), sLibName) );
+          var oLibDst = File.new_for_path( Path.build_filename(".", sLibName) );
           oLibSrc.copy(oLibDst, FileCopyFlags.OVERWRITE);
 
           if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
         }
+
+        c.cleanUp(true);
 
         if (!ok) {
           if (c.Verbose) { stdout.printf("not ok :(\n"); }

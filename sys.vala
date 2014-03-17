@@ -22,7 +22,7 @@
  */
 
 
-public class Sys
+public class Sys : GLib.Object
 {
   public string StdOut    { private set; get; default=""; }
   public string StdError  { private set; get; default=""; }

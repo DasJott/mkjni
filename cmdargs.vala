@@ -155,7 +155,7 @@ public class CmdArgs : GLib.Object
         string sSrcDir = Path.get_dirname(VFile);
         bool ok = copyValaFiles(sSrcDir, sTmpDir);
         if (ok) {
-          VFile = Path.build_path(sTmpDir, Path.get_basename(VFile));
+          VFile = Path.build_filename(sTmpDir, Path.get_basename(VFile));
           if (Verbose) { stdout.printf("ok :)\n"); }
         } else {
           if (Verbose) { stdout.printf("not ok :(\n"); }
@@ -175,7 +175,7 @@ public class CmdArgs : GLib.Object
   private string getTmpDir() throws Error
   {
     if (m_sTmpDir == null) {
-      m_sTmpDir = DirUtils.make_tmp("mkjni-makedir");
+      m_sTmpDir = DirUtils.make_tmp("mkjni-makedir-XXXXXX");
       cleanUp();
     }
     return m_sTmpDir;
@@ -193,12 +193,12 @@ public class CmdArgs : GLib.Object
           FileInfo info = null;
           while ( (info = e.next_file()) != null ) {
             try {
-              var oFile = File.new_for_path( Path.build_path(m_sTmpDir, info.get_name()) );
+              var oFile = File.new_for_path( Path.build_filename(m_sTmpDir, info.get_name()) );
               oFile.delete();
             } catch (Error e) {
             }
           }
-          e.unref();
+
           if (bDeleteTmpFolder) {
             try {
               oDir.delete();
@@ -227,16 +227,16 @@ public class CmdArgs : GLib.Object
       FileInfo info = null;
       while ( (info = e.next_file()) != null ) {
         if (info.get_file_type () == FileType.REGULAR && info.get_name().has_suffix(".vala")) {
-          var src = File.new_for_path( Path.build_path(sSrcDir, info.get_name()) );
-          var dst = File.new_for_path( Path.build_path(sDstDir, info.get_name()) );
+          var src = File.new_for_path( Path.build_filename(sSrcDir, info.get_name()) );
+          var dst = File.new_for_path( Path.build_filename(sDstDir, info.get_name()) );
 
-          bool ok = src.copy(dst, FileCopyFlags.OVERWRITE);
+          bool ok = src.copy(dst, FileCopyFlags.NONE);
           if (!ok) {
             stderr.printf("Error copying file \"%s\"\n", info.get_name());
           }
         }
       }
-      e.unref();
+
       return true;
     } catch (Error e) {
       stderr.printf("%s\n", e.message);
