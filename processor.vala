@@ -65,9 +65,9 @@ public class Processor : GLib.Object
           if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
         }
 
-        if (ok) {
+        if (ok && c.Compile) {
           if (c.Verbose) { stdout.printf("Compiling sources..."); }
-          var oGcc = new Compiler(oValaFile.getPath());
+          var oGcc = new Compiler(c.Compler, oValaFile.getPath());
           ok = oGcc.compile(c.VPackages);
           if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
 
@@ -78,7 +78,7 @@ public class Processor : GLib.Object
           }
         }
 
-        if (ok && c.UseTmp) {
+        if (ok && c.UseTmp && c.Compile && !c.NotLink) {
           if (c.Verbose) { stdout.printf("Copying results from tmp..."); }
 
           string sLibName = "lib%s.so".printf(c.LibName);

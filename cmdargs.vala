@@ -31,8 +31,10 @@ public class CmdArgs : GLib.Object
   public string VClass  { private set; get; default="";    } // -c --class
   public string Package { private set; get; default="";    } // -j --jns
   public string LibName { private set; get; default="";    } // -l --lib
+  public string Compler { private set; get; default="gcc"; } // -cc
   public bool   PkgDir  { private set; get; default=false; } // -d
   public bool   Verbose { private set; get; default=false; } // -v
+  public bool   Compile { private set; get; default=true;  } // -o
   public bool   NotLink { private set; get; default=false; } // -o
   public bool   UseTmp  { private set; get; default=false; } // -t
 
@@ -62,10 +64,11 @@ public class CmdArgs : GLib.Object
     for (int i=1; i<args.length; ++i) {
       if (opt != null) {
         switch (opt) {
-          case "f": VFile   = args[i]; break;
-          case "c": VClass  = args[i]; break;
-          case "j": Package = args[i]; break;
-          case "l": LibName = args[i]; break;
+          case "f":  VFile   = args[i]; break;
+          case "c":  VClass  = args[i]; break;
+          case "j":  Package = args[i]; break;
+          case "l":  LibName = args[i]; break;
+          case "cc": Compler = args[i]; break;
           case "p":
             VPackages.append( args[i] );
             break;
@@ -93,11 +96,17 @@ public class CmdArgs : GLib.Object
           case "--pkg":
             opt = "p";
             break;
+          case "-cc":
+            opt = "cc";
+            break;
           case "-d":
             PkgDir = true;
             break;
           case "-v":
             Verbose = true;
+            break;
+          case "-n":
+            Compile = false;
             break;
           case "-o":
             NotLink = true;
@@ -266,7 +275,11 @@ public class CmdArgs : GLib.Object
     stderr.printf("\n");
     stderr.printf("-j, --jns <package>       The Java namespace (package) to be created\n");
     stderr.printf("\n");
+    stderr.printf("-cc <compiler>            The compiler to be used (default: gcc)\n");
+    stderr.printf("\n");
     stderr.printf("-d                        Create Java file in package directory\n");
+    stderr.printf("\n");
+    stderr.printf("-n                        Not compile, just generate files\n");
     stderr.printf("\n");
     stderr.printf("-o                        Only compile, do not link\n");
     stderr.printf("\n");

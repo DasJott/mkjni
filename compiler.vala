@@ -24,10 +24,12 @@
 
 public class Compiler
 {
+  private string m_sCompiler = null;
   private string m_sWorkingDir = null;
 
-  public Compiler(string sWorkDir)
+  public Compiler(string sCompiler, string sWorkDir)
   {
+    m_sCompiler = sCompiler;
     m_sWorkingDir = sWorkDir;
   }
 
@@ -37,7 +39,7 @@ public class Compiler
     string sPkgConfig;
     bool ok = cmd( "pkg-config --cflags glib-2.0 gobject-2.0%s".printf(getPackages(pkgs)), out sPkgConfig);
     if (ok) {
-      ok = cmd( "gcc -fPIC -c %s -I%s *.c".printf(sPkgConfig, JniHeaderPath) );
+      ok = cmd( "%s -fPIC -c %s -I%s *.c".printf(m_sCompiler, sPkgConfig, JniHeaderPath) );
     }
     return ok;
   }
@@ -48,7 +50,7 @@ public class Compiler
     string sPkgConfig;
     bool ok = cmd( "pkg-config --libs --static glib-2.0 gobject-2.0%s".printf(getPackages(pkgs)), out sPkgConfig);
     if (ok) {
-      ok = cmd( "gcc -w -shared -o lib%s.so *.o %s".printf(sLibName, sPkgConfig) );
+      ok = cmd( "%s -w -shared -o lib%s.so *.o %s".printf(m_sCompiler, sLibName, sPkgConfig) );
     }
     return ok;
   }
@@ -58,7 +60,7 @@ public class Compiler
     string sPkgConfig;
     bool ok = cmd( "pkg-config --cflags --libs --static glib-2.0 gobject-2.0%s".printf(getPackages(pkgs)), out sPkgConfig );
     if (ok) {
-      ok = cmd( "gcc -fPIC -shared -o lib%s.so %s -I%s *.c".printf(sLibName, sPkgConfig, JniHeaderPath) );
+      ok = cmd( "%s -fPIC -shared -o lib%s.so %s -I%s *.c".printf(m_sCompiler, sLibName, sPkgConfig, JniHeaderPath) );
     } return ok;
   }
 
@@ -93,6 +95,9 @@ public class Compiler
               break;
             }
           }
+        }
+        if (m_jni_header_path == "") {
+          stderr.printf("error: could not find jni.h\n");
         }
       }
       return m_jni_header_path;
