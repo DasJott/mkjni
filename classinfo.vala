@@ -26,16 +26,25 @@ public class Class : GLib.Object
 {
   public Class(string sName) { name = sName; }
   public string name = "";
+  public string namespce = "";
   public string filename = ""; // generic filename w/o suffix
   public List<Class.Method> methods = new List<Class.Method>();
 
+  public string c_getType()
+  {
+    return namespce + name;
+  }
   public string c_getConstructor()
   {
-    return name.down() + "_new()";
+    string ns = "";
+    if (namespce != "") { ns = namespce.down() + "_"; }
+    return ns + name.down() + "_new()";
   }
   public string c_getName(Method oMethod)
   {
-    return name.down() + "_" + oMethod.name;
+    string ns = "";
+    if (namespce != "") { ns = namespce.down() + "_"; }
+    return ns + name.down() + "_" + oMethod.name;
   }
 
   public class Method

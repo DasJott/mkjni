@@ -43,12 +43,14 @@ public class ValaFile : GLib.Object
         oClass.filename = getGenericFilename();
 
         int nOpenBraces = 0;
-        bool bIsComment = false, bInClass = false;
+        string sNamespace = "";
+        bool bIsComment = false, bInClass = false, bIsInNamespace = false;
 
         // the Regex's to find all the stuff
         var regComment    = new Regex("^.*/\\*+((?!\\*/).)*$");
         var regNoComment  = new Regex("\\*/+");
         var regClass      = new Regex("^ *(public{1,1} +)?class{1,1} +([a-zA-Z_0-9]+) *:? *[a-zA-Z_0-9<> ,.]* *({?)$");
+        var regNamespace  = new Regex("^ *(namespace{1,1}) +([a-zA-Z_0-9]+) *({?)$");
         var regBraceOpen  = new Regex("^ *{[^}]*$");
         var regBraceClose = new Regex("^ *}[^{]*$");
         var regMethod     = new Regex("^ *(public|private)? *(static)? *([a-z0-9]+)? +([a-zA-Z0-9_]+) *\\({1,1}([a-zA-Z0-9<>_,\\*\\[\\] ]*)\\){1,1} *({?)$");
@@ -69,35 +71,47 @@ public class ValaFile : GLib.Object
 
           if (!bIsComment) {
 
+            if (regBraceOpen.match(sLine)) {
+              ++nOpenBraces;
+            }
+            if (regBraceClose.match(sLine)) {
+              --nOpenBraces;
+            }
+
             if (!bInClass) {
               MatchInfo info;
               if (regClass.match( sLine, 0, out info)) {
                 // 1: public, 2: Classname, 3: opening brace (or not)
                 if ( info.fetch(2) == sClassname ) {
                   bInClass = true;
-                  if ( info.fetch(3) == "{" ) {
-                    ++nOpenBraces;
-                  }
+                  oClass.namespce = sNamespace;
+                }
+                if ( info.fetch(3) == "{" ) {
+                  ++nOpenBraces;
+                }
+              } else if (regNamespace.match(sLine, 0, out info)){
+                // 1: namespace, 2: Erik, 3: opening brace (or not)
+                bIsInNamespace = true;
+                sNamespace = info.fetch(2);
+                if ( info.fetch(3) == "{" ) {
+                  ++nOpenBraces;
                 }
               }
             } else {
               // we are in the desired class
 
-              if (regBraceOpen.match(sLine)) {
-                ++nOpenBraces;
-              }
-              if (regBraceClose.match(sLine)) {
-                --nOpenBraces;
+              if (bIsInNamespace && nOpenBraces < 1) {
+                sNamespace = "";
+                bIsInNamespace = false;
               }
 
-              if (nOpenBraces < 1) {
+              if ((!bIsInNamespace && nOpenBraces < 1) || (bIsInNamespace && nOpenBraces < 2)) {
                 bInClass = false;
                 return oClass;
               }
 
-              if (nOpenBraces == 1) {
+              if ((!bIsInNamespace && nOpenBraces == 1) || (bIsInNamespace && nOpenBraces == 2)) {
                 // we are in the classes scope
-
                 MatchInfo info;
                 if (regMethod.match(sLine, 0, out info)) {
                   // 1: public/private, 2: static, 3: Return type, 4: Method name, 5: parameters (all), 6: opening brace (or not)

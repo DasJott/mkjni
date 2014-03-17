@@ -50,18 +50,21 @@ class Main
     try {
       MatchInfo info;
 
-      var regWildcard = new Regex("^([^\\*]*)(\\*+)(.*)$");
+      var regNamespace  = new Regex("^ *(namespace{1,1}) +([a-zA-Z_0-9]+) *({?)$");
 
       string[] ss = new string[] {
-        "valac",
-        "lib*.so",
-        "*.vala",
+        "namespace Erik",
+        "namespace Erik{",
+        "namespace Erik {",
+        "string foo = \"namespace\";",
+        "namespace{",
+        "namespace {",
       };
 
       foreach (string s in ss) {
         stdout.printf("# \"%s\"\n", s);
 
-        if ( regWildcard.match(s, 0, out info) ) {
+        if ( regNamespace.match(s, 0, out info) ) {
           stdout.printf("Match!\n");
           for (int i=0; i<info.get_match_count(); ++i) {
             stdout.printf("%i: \"%s\"\n", i, info.fetch(i));

@@ -105,9 +105,9 @@ public class JNIFiles : GLib.Object
         oStream.put_string("\n");
 
         // singleton construct method
-        string sVarInstance = "g_instance_of_%s".printf(m_oClass.name);
-        oStream.put_string("%s* %s = NULL;\n".printf(m_oClass.name, sVarInstance));
-        oStream.put_string("%s* getInstance(void)\n".printf(m_oClass.name));
+        string sVarInstance = "g_instance_of_%s".printf(m_oClass.c_getType());
+        oStream.put_string("%s* %s = NULL;\n".printf(m_oClass.c_getType(), sVarInstance));
+        oStream.put_string("%s* getInstance(void)\n".printf(m_oClass.c_getType()));
         oStream.put_string("{\n");
         oStream.put_string("if (%s == NULL) {\n".printf(sVarInstance));
         oStream.put_string("%s = %s;\n".printf(sVarInstance, m_oClass.c_getConstructor()));
