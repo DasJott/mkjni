@@ -14,12 +14,15 @@ So it feels like you could call the Vala class from Java!
 
 ### Params (must-have):
 
+Parameter                      | Description
 ------------------------------ | -----------------------------------------------------
 -c, --class &lt;class name&gt; | A class within the vala file to generate the jni from
 -l, --lib &lt;lib name&gt;     | Please specify the desired name of the library
                                | The name is w/o lib prefix and .so suffix!
 
 ### Options:
+
+Option                         | Description
 ------------------------------ | ----------------------------------------------------
 -p, --pkg &lt;package&gt;      | Packages to be included (Vala --pkg and pkg-config)
 -j, --jns &lt;package&gt;      | The Java namespace (package) to be created
