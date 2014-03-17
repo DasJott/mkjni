@@ -38,3 +38,8 @@ Example:
   mkjni -v -t -f myclass.vala -c MyClass -j de.dasjott.myclass -l superjni
 
 You should be provided with a result like libsuperjni.so for this example and a Java file MyClass.java in your current directory.
+
+
+If you find bugs, don't feed them, so they'll die over time.
+You could as well fix them yourself, as you have the code.
+Or you just call me to come by to squish them. Maybe I will ;)
