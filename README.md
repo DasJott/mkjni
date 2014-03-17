@@ -1,5 +1,4 @@
 # mkjni
-=====
 
 ## Call Vala code from Java
 
@@ -11,27 +10,26 @@ So it feels like you could call the Vala class from Java!
 **Parameters and return types must be string, int, bool ot void!**
 
 ## Usage
-  **mkjni [PARAMS][OPTIONS] <FILE(S)>**
+  **mkjni [PARAMS][OPTIONS] &lt;FILE(S)&gt;**
 
 ### Params (must-have):
 
--c, --class <class name>  A class within the vala file to generate the jni from
--l, --lib <lib name>      Please specify the desired name of the library
-                          The name is w/o lib prefix and .so suffix!
-
+-------------------------------|-----------------------------------------------------
+-c, --class &lt;class name&gt; |A class within the vala file to generate the jni from
+-l, --lib &lt;lib name&gt;     |Please specify the desired name of the library
+                               |The name is w/o lib prefix and .so suffix!
 
 ### Options:
-
--p, --pkg <package>       Packages to be included (Vala --pkg and pkg-config)
--j, --jns <package>       The Java namespace (package) to be created
--cc <compiler>            The compiler to be used (default: gcc)
--d                        Create Java file in package directory
--n                        Not compile, just generate files
--o                        Only compile, do not link
--t                        Use tmp directory for processing
--v                        Verbose - tell what's going on
-
--h, --help                for showing help
+-------------------------------|-----------------------------------------------------
+-p, --pkg &lt;package&gt;      |Packages to be included (Vala --pkg and pkg-config)
+-j, --jns &lt;package&gt;      |The Java namespace (package) to be created
+-cc &lt;compiler&gt;           |The compiler to be used (default: gcc)
+-d                             |Create Java file in package directory
+-n                             |Not compile, just generate files
+-o                             |Only compile, do not link
+-t                             |Use tmp directory for processing
+-v                             |Verbose - tell what's going on
+-h, --help                     |for showing help
 
 
 **Note: mkjni creates all files (and directories for java packages) in the directory where it is called.**
