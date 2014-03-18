@@ -50,7 +50,6 @@ public class JavaFile : GLib.Object
         }
         oStream.put_string("class %s\n".printf(oClass.name));
         oStream.put_string("{\n");
-        //oStream.put_string("  static { System.loadLibrary(\"glib-2.0\"); }\n");
         oStream.put_string("  static { System.loadLibrary(\"%s\"); }\n".printf(m_sLibName));
         oStream.put_string("\n");
 

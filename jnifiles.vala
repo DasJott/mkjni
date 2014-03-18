@@ -130,7 +130,6 @@ public class JNIFiles : GLib.Object
           sbMethods.append( "{\n" );
 
           sbMethods.append( getVariableDeclarations(oMethod) );
-          //sbMethods.append( "%s* pInstance = getInstance();\n".printf(m_oClass.name) );
           sbMethods.append( getMethodCall(oMethod, "getInstance()") );
           if (oMethod.returnType.returns_something()) {
             sbMethods.append( "return ret;\n" );
@@ -151,6 +150,14 @@ public class JNIFiles : GLib.Object
     return false;
   }
 
+  /*
+   *
+   * name: JNIFiles.getMethodSignature Creates a method signature as a string from a data struct
+   * @param oMethod The method to create the signature of
+   * @param bParamNames Give the params names
+   * @return the method signature as a string
+   *
+   */
   private string getMethodSignature(Class.Method oMethod, bool bParamNames)
   {
     var sbMethod = new StringBuilder();
@@ -219,39 +226,42 @@ public class JNIFiles : GLib.Object
     string sCall = "";
     if (oMethod.returnType.returns_something()) {
       if (oMethod.returnType == DataType.STRING) {
-        sCall = "const char* tmp = (const char*) %s(%s%s);\n".printf(
+        sCall = "const char* tmp = (const char*) %s(%s);\n".printf(
           m_oClass.c_getName(oMethod),
-          sInstance,
-          getCCallParams(oMethod)
+          getCCallParams(oMethod, sInstance)
         );
         sCall += "%s ret = (*pEnv)->NewStringUTF(pEnv, tmp);\n".printf(
           oMethod.returnType.to_jni_string()
         );
       } else {
-        sCall = "%s ret = (%s) %s(%s%s);\n".printf(
+        sCall = "%s ret = (%s) %s(%s);\n".printf(
           oMethod.returnType.to_jni_string(),
           oMethod.returnType.to_jni_string(),
           m_oClass.c_getName(oMethod),
-          sInstance,
-          getCCallParams(oMethod)
+          getCCallParams(oMethod, sInstance)
         );
       }
     } else {
-      sCall = "%s(%s%s);\n".printf(
+      sCall = "%s(%s);\n".printf(
         m_oClass.c_getName(oMethod),
-        sInstance,
-        getCCallParams(oMethod)
+        getCCallParams(oMethod, sInstance)
       );
     }
 
     return sCall;
   }
 
-  private string getCCallParams(Class.Method oMethod)
+  private string getCCallParams(Class.Method oMethod, string sInstance)
   {
     string sParams = "";
+
+    if (!oMethod.isStatic) {
+      // static methods need no instance
+      sParams += sInstance;
+    }
+
     oMethod.params.foreach( (oParam) => {
-      sParams += ", ";
+      if (sParams != "") { sParams += ", "; }
       sParams += oParam.name;
       sParams += "_";
     });
