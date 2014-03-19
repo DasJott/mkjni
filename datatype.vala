@@ -23,22 +23,24 @@
 
 
 public enum DataType {
-  NONE, UNKNOWN, VOID, STRING, INT, BOOL, FLOAT, DOUBLE, CHAR, ARR_STRING, ARR_INT;
+  NONE, UNKNOWN, VOID, STRING, INT, BOOL, FLOAT, DOUBLE, CHAR, ARR_STRING, ARR_INT, ARR_DOUBLE, ARR_FLOAT;
 
   public static DataType from_name(string sName)
   {
     switch (sName) {
-      case "void"    : return VOID;
-      case "int"     : return INT;
-      case "float"   : return FLOAT;
-      case "double"  : return DOUBLE;
-      case "char"    : return CHAR;
-      case "bool"    : return BOOL;
-      case "string"  : return STRING;
-      case "int[]"   : return ARR_INT;
-      case "string[]": return ARR_STRING;
-      case ""        : return NONE;
-      default        : return UNKNOWN;
+      case "void"     : return VOID;
+      case "int"      : return INT;
+      case "float"    : return FLOAT;
+      case "double"   : return DOUBLE;
+      case "char"     : return CHAR;
+      case "bool"     : return BOOL;
+      case "string"   : return STRING;
+      case "int[]"    : return ARR_INT;
+      case "string[]" : return ARR_STRING;
+      case "double[]" : return ARR_DOUBLE;
+      case "float[]"  : return ARR_FLOAT;
+      case ""         : return NONE;
+      default         : return UNKNOWN;
     }
   }
 
@@ -52,7 +54,9 @@ public enum DataType {
       case DOUBLE:
       case CHAR:
       case ARR_INT:
-      case ARR_STRING: return true;
+      case ARR_STRING:
+      case ARR_FLOAT:
+      case ARR_DOUBLE: return true;
       default:         return false;
     }
   }
@@ -69,6 +73,8 @@ public enum DataType {
       case STRING:     return "string";
       case ARR_INT:    return "int[]";
       case ARR_STRING: return "string[]";
+      case ARR_FLOAT:  return "float[]";
+      case ARR_DOUBLE: return "double[]";
       default:         return "";
     }
   }
@@ -85,6 +91,8 @@ public enum DataType {
       case STRING:     return "String";
       case ARR_INT:    return "int[]";
       case ARR_STRING: return "String[]";
+      case ARR_FLOAT:  return "float[]";
+      case ARR_DOUBLE: return "double[]";
       default:         return "";
     }
   }
@@ -101,6 +109,8 @@ public enum DataType {
       case STRING:     return "jstring";
       case ARR_INT:    return "jintArray";
       case ARR_STRING: return "jobjectArray";
+      case ARR_FLOAT:  return "jfloatArray";
+      case ARR_DOUBLE: return "jdoubleArray";
       default:         return "";
     }
   }
@@ -117,13 +127,15 @@ public enum DataType {
       case STRING:     return "gchar*";
       case ARR_INT:    return "gint*";
       case ARR_STRING: return "gchar**";
+      case ARR_FLOAT:  return "gfloat*";
+      case ARR_DOUBLE: return "gdouble*";
       default:         return "";
     }
   }
 
   public bool isArray()
   {
-    return ((this == ARR_INT) || (this == ARR_STRING));
+    return ((this == ARR_INT) || (this == ARR_STRING) || (this == ARR_DOUBLE) || (this == ARR_FLOAT));
   }
 }
 

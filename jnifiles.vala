@@ -216,6 +216,24 @@ public class JNIFiles : GLib.Object
           sCast += "  %s = (%s)(*pEnv)->GetIntArrayElements(pEnv, %s, 0);\n".printf(gvar, gtype, jvar);
           sCast += "}\n";
         } break;
+      case DataType.ARR_FLOAT:
+        {
+          sCast += "%s %s;\n".printf(gtype, gvar);
+          sCast += "int %s;\n".printf(arrlen);
+          sCast += "{\n";
+          sCast += "  %s = (*pEnv)->GetArrayLength(pEnv, %s);\n".printf(arrlen, jvar);
+          sCast += "  %s = (%s)(*pEnv)->GetFloatArrayElements(pEnv, %s, 0);\n".printf(gvar, gtype, jvar);
+          sCast += "}\n";
+        } break;
+      case DataType.ARR_DOUBLE:
+        {
+          sCast += "%s %s;\n".printf(gtype, gvar);
+          sCast += "int %s;\n".printf(arrlen);
+          sCast += "{\n";
+          sCast += "  %s = (*pEnv)->GetArrayLength(pEnv, %s);\n".printf(arrlen, jvar);
+          sCast += "  %s = (%s)(*pEnv)->GetDoubleArrayElements(pEnv, %s, 0);\n".printf(gvar, gtype, jvar);
+          sCast += "}\n";
+        } break;
       case DataType.ARR_STRING:
         {
           sCast += "%s %s;\n".printf(gtype, gvar);
@@ -297,6 +315,36 @@ public class JNIFiles : GLib.Object
           oMethod.returnLength
         );
         sCall += "(*pEnv)->SetIntArrayRegion(pEnv, ret, 0, %s, tmp);\n".printf(oMethod.returnLength);
+        sCall += "}\n";
+      } else if (oMethod.returnType == DataType.ARR_FLOAT) {
+        sCall += "%s ret;\n".printf(oMethod.returnType.to_jni_string());
+        sCall += "{\n";
+        sCall += "int %s=0;\n".printf(oMethod.returnLength);
+        sCall += "%s* tmp = (%s*) %s(%s);\n".printf(
+          DataType.FLOAT.to_jni_string(),
+          DataType.FLOAT.to_jni_string(),
+          m_oClass.c_getName(oMethod),
+          getCCallParams(oMethod, sInstance)
+        );
+        sCall += "ret = (*pEnv)->NewFloatArray(pEnv, %s);\n".printf(
+          oMethod.returnLength
+        );
+        sCall += "(*pEnv)->SetFloatArrayRegion(pEnv, ret, 0, %s, tmp);\n".printf(oMethod.returnLength);
+        sCall += "}\n";
+      } else if (oMethod.returnType == DataType.ARR_DOUBLE) {
+        sCall += "%s ret;\n".printf(oMethod.returnType.to_jni_string());
+        sCall += "{\n";
+        sCall += "int %s=0;\n".printf(oMethod.returnLength);
+        sCall += "%s* tmp = (%s*) %s(%s);\n".printf(
+          DataType.DOUBLE.to_jni_string(),
+          DataType.DOUBLE.to_jni_string(),
+          m_oClass.c_getName(oMethod),
+          getCCallParams(oMethod, sInstance)
+        );
+        sCall += "ret = (*pEnv)->NewDoubleArray(pEnv, %s);\n".printf(
+          oMethod.returnLength
+        );
+        sCall += "(*pEnv)->SetDoubleArrayRegion(pEnv, ret, 0, %s, tmp);\n".printf(oMethod.returnLength);
         sCall += "}\n";
       } else {
         sCall = "%s ret = (%s) %s(%s);\n".printf(
