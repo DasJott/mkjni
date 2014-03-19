@@ -8,10 +8,7 @@ So it feels like you could call the Vala class from Java!<br/>
 
 ## Limitations:
 ### Only possible types:
-You *MUST* only use the following types:<br/>
-<br/>
-Parameters: string, int, bool, string[] int[]<br/>
-Return: string, int, bool, void<br/>
+You *MUST* only use the following types: string, int, bool, string[] int[]<br/>
 
 ## Usage
   **mkjni [PARAMS][OPTIONS] &lt;FILE(S)&gt;**
@@ -41,7 +38,6 @@ Option                         | Description
 **Note: mkjni creates all files (and directories for java packages) in the directory where it is called.**
 
 ## Example:
-
   **mkjni -v -t -c MyClass -j de.dasjott.myclass -l superjni *.vala**
 
 You should be provided with a result like libsuperjni.so for this example and a Java file MyClass.java in your current directory.
