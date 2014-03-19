@@ -280,7 +280,9 @@ public class JNIFiles : GLib.Object
         );
         sCall += "int i;\n";
         sCall += "for (i=0; i<%s;++i) {\n".printf(oMethod.returnLength);
-        sCall += "(*pEnv)->SetObjectArrayElement(pEnv, ret, i, tmp[i]);\n";
+        sCall += "jstring str = (*pEnv)->NewStringUTF(pEnv, tmp[i]);\n";
+        sCall += "(*pEnv)->SetObjectArrayElement(pEnv, ret, i, str);\n";
+        sCall += "(*pEnv)->DeleteLocalRef(pEnv, str);\n";
         sCall += "}\n";
         sCall += "}\n";
       } else if (oMethod.returnType == DataType.ARR_INT) {
@@ -291,8 +293,7 @@ public class JNIFiles : GLib.Object
           m_oClass.c_getName(oMethod),
           getCCallParams(oMethod, sInstance)
         );
-        sCall += "%s ret = (*pEnv)->NewIntArray(pEnv, %s);\n".printf(
-          oMethod.returnType.to_jni_string(),
+        sCall += "ret = (*pEnv)->NewIntArray(pEnv, %s);\n".printf(
           oMethod.returnLength
         );
         sCall += "(*pEnv)->SetIntArrayRegion(pEnv, ret, 0, %s, tmp);\n".printf(oMethod.returnLength);
