@@ -51,8 +51,8 @@ public class ValaFile : GLib.Object
         var regNoComment  = new Regex("\\*/+");
         var regClass      = new Regex("^ *(public{1,1} +)?class{1,1} +([a-zA-Z_0-9]+) *:? *[a-zA-Z_0-9<> ,.]* *({?)$");
         var regNamespace  = new Regex("^ *(namespace{1,1}) +([a-zA-Z_0-9]+) *({?)$");
-        var regBraceOpen  = new Regex("^.*{[^}]*$");
-        var regBraceClose = new Regex("^.*}[^{]*$");
+        var regBraceOpen  = new Regex("^[^}]*{[^}]*$");
+        var regBraceClose = new Regex("^[^{]*}[^{]*$");
         var regMethod     = new Regex("^ *(public|private)? *(static)? *([a-z0-9\\[\\]]+)? +([a-zA-Z0-9_]+) *\\({1,1}([a-zA-Z0-9<>_,\\*\\[\\] ]*)\\){1,1} *({?)$");
 
         var oStream = new DataInputStream( m_oFile.read() );

@@ -199,53 +199,53 @@ public class JNIFiles : GLib.Object
 
     int i = 0;
     oMethod.params.foreach( (oParam) => {
+      string gtype  = oParam.type.to_glib_string();  // parameter type - glib type
+      //string jtype  = oParam.type.to_java_string();  // parameter type - java name
+      string jvar   = oParam.name + i.to_string();   // name of method parameter name (java)
+      string gvar   = oParam.cname;                  // name of (casted) variable whithin method (glib)
+      string arrlen = oParam.arrlength;              // if param is an array, this is the name of the matching length variable
+
       string sCast = "";
       switch (oParam.type) {
-      case DataType.INT:
-        {
-          sCast = "gint %s = (gint) %s;\n";
-        } break;
-      case DataType.BOOL:
-        {
-          sCast = "gboolean %s = (gboolean) %s;\n";
-        } break;
-      case DataType.STRING:
-        {
-          sCast = "gchar* %s = (*pEnv)->GetStringUTFChars(pEnv, %s, 0);\n";
-        } break;
       case DataType.ARR_INT:
         {
-          sCast += "gint* %s;\n";
-          sCast += "int %slength;\n".printf(oParam.cname);
+          sCast += "%s %s;\n".printf(gtype, gvar);
+          sCast += "int %s;\n".printf(arrlen);
           sCast += "{\n";
-          sCast += "jintArray arr = %s;\n";
-          sCast += "%slength = (*pEnv)->GetArrayLength(pEnv, arr);\n".printf(oParam.cname);
-          sCast += "%s = (jstring)(*pEnv)->GetIntArrayElements(pEnv, arr, 0);\n".printf(oParam.cname);
+          sCast += "  %s = (*pEnv)->GetArrayLength(pEnv, %s);\n".printf(arrlen, jvar);
+          sCast += "  %s = (%s)(*pEnv)->GetIntArrayElements(pEnv, %s, 0);\n".printf(gvar, gtype, jvar);
           sCast += "}\n";
         } break;
       case DataType.ARR_STRING:
         {
-          sCast += "gchar** %s;\n";
-          sCast += "int %slength;\n".printf(oParam.cname);
+          sCast += "%s %s;\n".printf(gtype, gvar);
+          sCast += "int %s;\n".printf(arrlen);
           sCast += "{\n";
-          sCast += "jobjectArray arr = %s;\n";
-          sCast += "int length = (*pEnv)->GetArrayLength(pEnv, arr);\n";
-          sCast += "gchar** ss = (gchar**) malloc(length*sizeof(gchar*));\n";
-          sCast += "int i=0;\n";
-          sCast += "for(i=0;i<length;++i) {\n";
-          sCast += "jstring js = (jstring)(*pEnv)->GetObjectArrayElement(pEnv, arr, i);\n";
-          sCast += "gchar* gs = (gchar*)(*pEnv)->GetStringUTFChars(pEnv, js, 0);\n";
-          sCast += "ss[i] = g_strdup(gs);\n";
-          sCast += "(*pEnv)->ReleaseStringUTFChars(pEnv, js, gs);\n";
-          sCast += "}\n";
-          sCast += "%s = ss;\n".printf(oParam.cname);
-          sCast += "%slength = length;\n".printf(oParam.cname);
+          sCast += "  %s = (*pEnv)->GetArrayLength(pEnv, %s);\n".printf(arrlen, jvar);
+          sCast += "  %s = (%s) malloc(%s*sizeof(%s));\n".printf(gvar, gtype, arrlen, DataType.STRING.to_glib_string());
+          sCast += "  int i=0;\n";
+          sCast += "  for(i=0;i<%s;++i) {\n".printf(arrlen);
+          sCast += "    %s js = (%s)(*pEnv)->GetObjectArrayElement(pEnv, %s, i);\n".printf(
+                      DataType.STRING.to_jni_string(), DataType.STRING.to_jni_string(), jvar
+                    );
+          sCast += "    %s gs = (%s)(*pEnv)->GetStringUTFChars(pEnv, js, 0);\n".printf(
+                      DataType.STRING.to_glib_string(), DataType.STRING.to_glib_string()
+                    );
+          sCast += "    %s[i] = g_strdup(gs);\n".printf(gvar);
+          sCast += "    (*pEnv)->ReleaseStringUTFChars(pEnv, js, gs);\n";
+          sCast += "  }\n";
           sCast += "}\n";
         } break;
+      case DataType.STRING:
+        {
+          sCast = "%s %s = (%s)(*pEnv)->GetStringUTFChars(pEnv, %s, 0);\n".printf(gtype, gvar, gtype, jvar);
+        } break;
+      default:
+        {
+          sCast = "%s %s = (%s) %s;\n".printf(gtype, gvar, gtype, jvar);
+        } break;
       }
-      if (sCast != "") {
-        sb.append( sCast.printf(oParam.cname, oParam.name + i.to_string()) );
-      }
+      if (sCast != "") { sb.append(sCast); }
       ++i;
     });
 
@@ -331,15 +331,13 @@ public class JNIFiles : GLib.Object
       sParams += oParam.cname;
       if (oParam.type.isArray()) {
         sParams += ",";
-        sParams += oParam.cname;
-        sParams += "length";
+        sParams += oParam.arrlength;
       }
     });
     if (oMethod.returnType.isArray()) {
       if (sParams != "") { sParams += ", "; }
       sParams += "&";
-      sParams += oMethod.name;
-      sParams += "_retlen";
+      sParams += oMethod.returnLength;
     }
     return sParams;
   }
@@ -352,12 +350,6 @@ public class JNIFiles : GLib.Object
     int i=0;
     oMethod.params.foreach( (oParam) => {
       switch (oParam.type) {
-      case DataType.INT:
-        {
-        } break;
-      case DataType.BOOL:
-        {
-        } break;
       case DataType.STRING:
         {
           sCode = "(*pEnv)->ReleaseStringUTFChars(pEnv, %s, %s);\n".printf( oParam.name + i.to_string(), oParam.cname );

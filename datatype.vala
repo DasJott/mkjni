@@ -23,13 +23,16 @@
 
 
 public enum DataType {
-  NONE, UNKNOWN, VOID, STRING, INT, BOOL, ARR_STRING, ARR_INT;
+  NONE, UNKNOWN, VOID, STRING, INT, BOOL, FLOAT, DOUBLE, CHAR, ARR_STRING, ARR_INT;
 
   public static DataType from_name(string sName)
   {
     switch (sName) {
       case "void"    : return VOID;
       case "int"     : return INT;
+      case "float"   : return FLOAT;
+      case "double"  : return DOUBLE;
+      case "char"    : return CHAR;
       case "bool"    : return BOOL;
       case "string"  : return STRING;
       case "int[]"   : return ARR_INT;
@@ -45,6 +48,9 @@ public enum DataType {
       case INT:
       case BOOL:
       case STRING:
+      case FLOAT:
+      case DOUBLE:
+      case CHAR:
       case ARR_INT:
       case ARR_STRING: return true;
       default:         return false;
@@ -57,6 +63,9 @@ public enum DataType {
       case VOID:       return "void";
       case INT:        return "int";
       case BOOL:       return "bool";
+      case FLOAT:      return "float";
+      case DOUBLE:     return "double";
+      case CHAR:       return "char";
       case STRING:     return "string";
       case ARR_INT:    return "int[]";
       case ARR_STRING: return "string[]";
@@ -70,6 +79,9 @@ public enum DataType {
       case VOID:       return "void";
       case INT:        return "int";
       case BOOL:       return "boolean";
+      case FLOAT:      return "float";
+      case DOUBLE:     return "double";
+      case CHAR:       return "char";
       case STRING:     return "String";
       case ARR_INT:    return "int[]";
       case ARR_STRING: return "String[]";
@@ -83,9 +95,28 @@ public enum DataType {
       case VOID:       return "void";
       case INT:        return "jint";
       case BOOL:       return "jboolean";
+      case FLOAT:      return "jfloat";
+      case DOUBLE:     return "jdouble";
+      case CHAR:       return "jchar";
       case STRING:     return "jstring";
       case ARR_INT:    return "jintArray";
       case ARR_STRING: return "jobjectArray";
+      default:         return "";
+    }
+  }
+
+  public string to_glib_string()
+  {
+    switch (this) {
+      case VOID:       return "void";
+      case INT:        return "gint";
+      case BOOL:       return "gboolean";
+      case FLOAT:      return "gfloat";
+      case DOUBLE:     return "gdouble";
+      case CHAR:       return "gchar";
+      case STRING:     return "gchar*";
+      case ARR_INT:    return "gint*";
+      case ARR_STRING: return "gchar**";
       default:         return "";
     }
   }

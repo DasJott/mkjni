@@ -66,6 +66,8 @@ public class Class : GLib.Object
 
       // the name of the cast one
       public string cname { owned get { return name + "_"; } }
+      // variable name of an array length specification
+      public string arrlength { owned get { return name + "_length"; } }
     }
   }
 }
