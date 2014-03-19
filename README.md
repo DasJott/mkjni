@@ -7,7 +7,11 @@ Write some functionality in Vala, specify a class you want to "export" to Java a
 So it feels like you could call the Vala class from Java!<br/>
 
 ## Limitations:
-**Parameters and return types must be string, int, bool or void!**
+### Only possible types:
+You *MUST* only use the following types:<br/>
+<br/>
+Parameters: string, int, bool, srting[] int[]<br/>
+Return: string, int, bool, void<br/>
 
 ## Usage
   **mkjni [PARAMS][OPTIONS] &lt;FILE(S)&gt;**
