@@ -10,7 +10,7 @@ So it feels like you could call the Vala class from Java!<br/>
 ### Only possible types:
 You *MUST* only use the following types:<br/>
 <br/>
-Parameters: string, int, bool, srting[] int[]<br/>
+Parameters: string, int, bool, string[] int[]<br/>
 Return: string, int, bool, void<br/>
 
 ## Usage
