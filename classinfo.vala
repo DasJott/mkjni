@@ -55,6 +55,7 @@ public class Class : GLib.Object
     public DataType returnType = DataType.NONE;
     public bool isStatic = false;
     public List<Class.Method.Parameter> params = new List<Class.Method.Parameter>();
+    public string returnLength { owned get { return name + "_retlen"; } }
 
     public class Parameter
     {
@@ -62,6 +63,9 @@ public class Class : GLib.Object
       public string name = "";
       public DataType type = DataType.NONE;
       public string direction = "";
+
+      // the name of the cast one
+      public string cname { owned get { return name + "_"; } }
     }
   }
 }

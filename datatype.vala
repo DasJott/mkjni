@@ -23,17 +23,19 @@
 
 
 public enum DataType {
-  NONE, UNKNOWN, VOID, STRING, INT, BOOL;
+  NONE, UNKNOWN, VOID, STRING, INT, BOOL, ARR_STRING, ARR_INT;
 
   public static DataType from_name(string sName)
   {
     switch (sName) {
-      case "void":   return VOID;
-      case "int":    return INT;
-      case "bool":   return BOOL;
-      case "string": return STRING;
-      case ""      : return NONE;
-      default:       return UNKNOWN;
+      case "void"    : return VOID;
+      case "int"     : return INT;
+      case "bool"    : return BOOL;
+      case "string"  : return STRING;
+      case "int[]"   : return ARR_INT;
+      case "string[]": return ARR_STRING;
+      case ""        : return NONE;
+      default        : return UNKNOWN;
     }
   }
 
@@ -42,42 +44,55 @@ public enum DataType {
     switch (this) {
       case INT:
       case BOOL:
-      case STRING: return true;
-      default:     return false;
+      case STRING:
+      case ARR_INT:
+      case ARR_STRING: return true;
+      default:         return false;
     }
   }
 
   public string to_vala_string()
   {
     switch (this) {
-      case VOID:   return "void";
-      case INT:    return "int";
-      case BOOL:   return "bool";
-      case STRING: return "string";
-      default:     return "";
+      case VOID:       return "void";
+      case INT:        return "int";
+      case BOOL:       return "bool";
+      case STRING:     return "string";
+      case ARR_INT:    return "int[]";
+      case ARR_STRING: return "string[]";
+      default:         return "";
     }
   }
 
   public string to_java_string()
   {
     switch (this) {
-      case VOID:   return "void";
-      case INT:    return "int";
-      case BOOL:   return "boolean";
-      case STRING: return "String";
-      default:     return "";
+      case VOID:       return "void";
+      case INT:        return "int";
+      case BOOL:       return "boolean";
+      case STRING:     return "String";
+      case ARR_INT:    return "int[]";
+      case ARR_STRING: return "String[]";
+      default:         return "";
     }
   }
 
   public string to_jni_string()
   {
     switch (this) {
-      case VOID:   return "void";
-      case INT:    return "jint";
-      case BOOL:   return "jboolean";
-      case STRING: return "jstring";
-      default:     return "";
+      case VOID:       return "void";
+      case INT:        return "jint";
+      case BOOL:       return "jboolean";
+      case STRING:     return "jstring";
+      case ARR_INT:    return "jintArray";
+      case ARR_STRING: return "jobjectArray";
+      default:         return "";
     }
+  }
+
+  public bool isArray()
+  {
+    return ((this == ARR_INT) || (this == ARR_STRING));
   }
 }
 

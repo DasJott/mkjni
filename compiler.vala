@@ -39,7 +39,7 @@ public class Compiler
     string sPkgConfig;
     bool ok = cmd( "pkg-config --cflags glib-2.0 gobject-2.0%s".printf(getPackages(pkgs)), out sPkgConfig);
     if (ok) {
-      ok = cmd( "%s -fPIC -c %s -I%s *.c".printf(m_sCompiler, sPkgConfig, JniHeaderPath) );
+      ok = cmd( "%s -w -fPIC -c %s -I%s *.c".printf(m_sCompiler, sPkgConfig, JniHeaderPath) );
     }
     return ok;
   }

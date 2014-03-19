@@ -131,6 +131,7 @@ public class JNIFiles : GLib.Object
 
           sbMethods.append( getVariableDeclarations(oMethod) );
           sbMethods.append( getMethodCall(oMethod, "getInstance()") );
+          sbMethods.append( getVariableCleanup(oMethod) );
           if (oMethod.returnType.returns_something()) {
             sbMethods.append( "return ret;\n" );
           }
@@ -191,6 +192,7 @@ public class JNIFiles : GLib.Object
     return sbMethod.str;
   }
 
+  // receive the parameters from java and cast them to vala-c-code
   private string getVariableDeclarations(Class.Method oMethod)
   {
     StringBuilder sb = new StringBuilder();
@@ -201,19 +203,48 @@ public class JNIFiles : GLib.Object
       switch (oParam.type) {
       case DataType.INT:
         {
-          sCast = "int %s = (int) %s;\n";
+          sCast = "gint %s = (gint) %s;\n";
         } break;
       case DataType.BOOL:
         {
-          sCast = "bool %s = (bool) %s;\n";
+          sCast = "gboolean %s = (gboolean) %s;\n";
         } break;
       case DataType.STRING:
         {
-          sCast = "const char* %s = (*pEnv)->GetStringUTFChars(pEnv, %s, 0);\n";
+          sCast = "gchar* %s = (*pEnv)->GetStringUTFChars(pEnv, %s, 0);\n";
+        } break;
+      case DataType.ARR_INT:
+        {
+          sCast += "gint* %s;\n";
+          sCast += "int %slength;\n".printf(oParam.cname);
+          sCast += "{\n";
+          sCast += "jintArray arr = %s;\n";
+          sCast += "%slength = (*pEnv)->GetArrayLength(pEnv, arr);\n".printf(oParam.cname);
+          sCast += "%s = (jstring)(*pEnv)->GetIntArrayElements(pEnv, arr, 0);\n".printf(oParam.cname);
+          sCast += "}\n";
+        } break;
+      case DataType.ARR_STRING:
+        {
+          sCast += "gchar** %s;\n";
+          sCast += "int %slength;\n".printf(oParam.cname);
+          sCast += "{\n";
+          sCast += "jobjectArray arr = %s;\n";
+          sCast += "int length = (*pEnv)->GetArrayLength(pEnv, arr);\n";
+          sCast += "gchar** ss = (gchar**) malloc(length*sizeof(gchar*));\n";
+          sCast += "int i=0;\n";
+          sCast += "for(i=0;i<length;++i) {\n";
+          sCast += "jstring js = (jstring)(*pEnv)->GetObjectArrayElement(pEnv, arr, i);\n";
+          sCast += "gchar* gs = (gchar*)(*pEnv)->GetStringUTFChars(pEnv, js, 0);\n";
+          sCast += "ss[i] = g_strdup(gs);\n";
+          sCast += "(*pEnv)->ReleaseStringUTFChars(pEnv, js, gs);\n";
+          sCast += "}\n";
+          sCast += "%s = ss;\n".printf(oParam.cname);
+          sCast += "%slength = length;\n".printf(oParam.cname);
+          sCast += "}\n";
         } break;
       }
       if (sCast != "") {
-        sb.append( sCast.printf(oParam.name + "_", oParam.name + i.to_string()) );
+        sb.append( sCast.printf(oParam.cname, oParam.name + i.to_string()) );
       }
       ++i;
     });
@@ -221,18 +252,51 @@ public class JNIFiles : GLib.Object
     return sb.str;
   }
 
+  // call vala-c-code generate return value
   private string getMethodCall(Class.Method oMethod, string sInstance)
   {
     string sCall = "";
     if (oMethod.returnType.returns_something()) {
       if (oMethod.returnType == DataType.STRING) {
-        sCall = "const char* tmp = (const char*) %s(%s);\n".printf(
+        sCall += "%s ret;\n".printf(oMethod.returnType.to_jni_string());
+        sCall += "{\n";
+        sCall += "const char* tmp = (const char*) %s(%s);\n".printf(
           m_oClass.c_getName(oMethod),
           getCCallParams(oMethod, sInstance)
         );
-        sCall += "%s ret = (*pEnv)->NewStringUTF(pEnv, tmp);\n".printf(
-          oMethod.returnType.to_jni_string()
+        sCall += "ret = (*pEnv)->NewStringUTF(pEnv, tmp);\n";
+        sCall += "}\n";
+      } else if (oMethod.returnType == DataType.ARR_STRING) {
+        sCall += "%s ret;\n".printf(oMethod.returnType.to_jni_string());
+        sCall += "{\n";
+        sCall += "int %s=0;\n".printf(oMethod.returnLength);
+        sCall += "gchar** tmp = %s(%s);\n".printf(
+          m_oClass.c_getName(oMethod),
+          getCCallParams(oMethod, sInstance)
         );
+        sCall += "ret = (%s)(*pEnv)->NewObjectArray(pEnv, %s, (*pEnv)->FindClass(pEnv, \"java/lang/String\"), (*pEnv)->NewStringUTF(pEnv, \"\"));\n".printf(
+          oMethod.returnType.to_jni_string(),
+          oMethod.returnLength
+        );
+        sCall += "int i;\n";
+        sCall += "for (i=0; i<%s;++i) {\n".printf(oMethod.returnLength);
+        sCall += "(*pEnv)->SetObjectArrayElement(pEnv, ret, i, tmp[i]);\n";
+        sCall += "}\n";
+        sCall += "}\n";
+      } else if (oMethod.returnType == DataType.ARR_INT) {
+        sCall += "%s ret;\n".printf(oMethod.returnType.to_jni_string());
+        sCall += "{\n";
+        sCall += "int %s=0;\n".printf(oMethod.returnLength);
+        sCall += "jint* tmp = (jint*) %s(%s);\n".printf(
+          m_oClass.c_getName(oMethod),
+          getCCallParams(oMethod, sInstance)
+        );
+        sCall += "%s ret = (*pEnv)->NewIntArray(pEnv, %s);\n".printf(
+          oMethod.returnType.to_jni_string(),
+          oMethod.returnLength
+        );
+        sCall += "(*pEnv)->SetIntArrayRegion(pEnv, ret, 0, %s, tmp);\n".printf(oMethod.returnLength);
+        sCall += "}\n";
       } else {
         sCall = "%s ret = (%s) %s(%s);\n".printf(
           oMethod.returnType.to_jni_string(),
@@ -251,6 +315,7 @@ public class JNIFiles : GLib.Object
     return sCall;
   }
 
+  // get parameters to call vala-c-code methods
   private string getCCallParams(Class.Method oMethod, string sInstance)
   {
     string sParams = "";
@@ -262,10 +327,53 @@ public class JNIFiles : GLib.Object
 
     oMethod.params.foreach( (oParam) => {
       if (sParams != "") { sParams += ", "; }
-      sParams += oParam.name;
-      sParams += "_";
+      sParams += oParam.cname;
+      if (oParam.type.isArray()) {
+        sParams += ",";
+        sParams += oParam.cname;
+        sParams += "length";
+      }
     });
+    if (oMethod.returnType.isArray()) {
+      if (sParams != "") { sParams += ", "; }
+      sParams += "&";
+      sParams += oMethod.name;
+      sParams += "_retlen";
+    }
     return sParams;
+  }
+
+  // get code to clean up
+  private string getVariableCleanup(Class.Method oMethod)
+  {
+    string sCode = "";
+
+    int i=0;
+    oMethod.params.foreach( (oParam) => {
+      switch (oParam.type) {
+      case DataType.INT:
+        {
+        } break;
+      case DataType.BOOL:
+        {
+        } break;
+      case DataType.STRING:
+        {
+          sCode = "(*pEnv)->ReleaseStringUTFChars(pEnv, %s, %s);\n".printf( oParam.name + i.to_string(), oParam.cname );
+        } break;
+      case DataType.ARR_INT:
+        {
+          sCode = "(*pEnv)->ReleaseIntArrayElements(pEnv, %s, %s, 0);\n".printf( oParam.name + i.to_string(), oParam.cname );
+        } break;
+      case DataType.ARR_STRING:
+        {
+          sCode = "free(%s);\n".printf(oParam.cname);
+        } break;
+      }
+      ++i;
+    });
+
+    return sCode;
   }
 
   private File? getFile(string sFilename)

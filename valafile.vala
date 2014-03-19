@@ -51,9 +51,9 @@ public class ValaFile : GLib.Object
         var regNoComment  = new Regex("\\*/+");
         var regClass      = new Regex("^ *(public{1,1} +)?class{1,1} +([a-zA-Z_0-9]+) *:? *[a-zA-Z_0-9<> ,.]* *({?)$");
         var regNamespace  = new Regex("^ *(namespace{1,1}) +([a-zA-Z_0-9]+) *({?)$");
-        var regBraceOpen  = new Regex("^ *{[^}]*$");
-        var regBraceClose = new Regex("^ *}[^{]*$");
-        var regMethod     = new Regex("^ *(public|private)? *(static)? *([a-z0-9]+)? +([a-zA-Z0-9_]+) *\\({1,1}([a-zA-Z0-9<>_,\\*\\[\\] ]*)\\){1,1} *({?)$");
+        var regBraceOpen  = new Regex("^.*{[^}]*$");
+        var regBraceClose = new Regex("^.*}[^{]*$");
+        var regMethod     = new Regex("^ *(public|private)? *(static)? *([a-z0-9\\[\\]]+)? +([a-zA-Z0-9_]+) *\\({1,1}([a-zA-Z0-9<>_,\\*\\[\\] ]*)\\){1,1} *({?)$");
 
         var oStream = new DataInputStream( m_oFile.read() );
         string sLine;
@@ -123,6 +123,8 @@ public class ValaFile : GLib.Object
                     oMethod.returnType = DataType.from_name( info.fetch(3) );
                     if ( setParameters( info.fetch(5), ref oMethod.params ) ) {
                       oClass.methods.append( oMethod );
+                    } else {
+                      // TODO: Maybe breakup and exit?
                     }
                   }
                   if ( info.fetch(6) == "{" ) {
@@ -187,7 +189,7 @@ public class ValaFile : GLib.Object
 
     try {
       MatchInfo info;
-      var regParam = new Regex("^ *((ref|out)? *)([a-zA-Z0-9]+) +([a-zA-Z0-9_]+)$");
+      var regParam = new Regex("^ *((ref|out)? *)([a-zA-Z0-9\\[\\]]+) +([a-zA-Z0-9_]+)$");
 
       string[] asParams = sParams.split(",");
       foreach (string sParam in asParams) {
