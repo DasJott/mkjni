@@ -29,7 +29,7 @@ public class Processor : GLib.Object
     bool ok = false;
 
     try {
-      if (c.Verbose) { stdout.printf("Getting vala class..."); }
+      if (c.Verbose) { verbose("Getting vala class..."); }
       Class oClass = null;
       ValaFile oValaFile = null;
       foreach (string sVFile in c.VFiles) {
@@ -43,45 +43,45 @@ public class Processor : GLib.Object
       }
 
       if (oClass != null) {
-        if (c.Verbose) { stdout.printf("ok :)\nCreating Java file..."); }
+        if (c.Verbose) { verbose("ok :)\nCreating Java file..."); }
         var oJavaFile = new JavaFile(c.LibName);
         ok = oJavaFile.create(oClass, c.Package, c.PkgDir);
-        if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
+        if (ok && c.Verbose) { verbose("ok :)\n"); }
 
         JNIFiles oJniFiles = null;
         if (ok) {
-          if (c.Verbose) { stdout.printf("Creating JNI header..."); }
+          if (c.Verbose) { verbose("Creating JNI header..."); }
           oJniFiles = new JNIFiles(oClass, c.Package);
           ok = oJniFiles.createHeader(oValaFile.getPath());
-          if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
+          if (ok && c.Verbose) { verbose("ok :)\n"); }
         }
         if (ok) {
-          if (c.Verbose) { stdout.printf("Creating JNI implementation..."); }
+          if (c.Verbose) { verbose("Creating JNI implementation..."); }
           ok = oJniFiles.createImplementation(oValaFile.getPath());
-          if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
+          if (ok && c.Verbose) { verbose("ok :)\n"); }
         }
 
         if (ok) {
-          if (c.Verbose) { stdout.printf("Make C code from Vala code..."); }
+          if (c.Verbose) { verbose("Make C code from Vala code..."); }
           ok = ValaFile.compile2Ccode(oValaFile.getPath(), c.VFiles, c.VPackages, oValaFile.getHeaderName());
-          if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
+          if (ok && c.Verbose) { verbose("ok :)\n"); }
         }
 
         if (ok && c.Compile) {
-          if (c.Verbose) { stdout.printf("Compiling sources..."); }
+          if (c.Verbose) { verbose("Compiling sources..."); }
           var oGcc = new Compiler(c.Compler, oValaFile.getPath());
           ok = oGcc.compile(c.VPackages);
-          if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
+          if (ok && c.Verbose) { verbose("ok :)\n"); }
 
           if (!c.NotLink) {
-            if (c.Verbose) { stdout.printf("Link objects to \"lib%s.so\"...", c.LibName); }
+            if (c.Verbose) { verbose("Link objects to \"lib%s.so\"...", c.LibName); }
             ok = oGcc.link(c.LibName, c.VPackages);
-            if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
+            if (ok && c.Verbose) { verbose("ok :)\n"); }
           }
         }
 
         if (ok && c.UseTmp && c.Compile && !c.NotLink) {
-          if (c.Verbose) { stdout.printf("Copying results from tmp..."); }
+          if (c.Verbose) { verbose("Copying results from tmp..."); }
 
           string sLibName = "lib%s.so".printf(c.LibName);
 
@@ -89,25 +89,31 @@ public class Processor : GLib.Object
           var oLibDst = File.new_for_path( Path.build_filename(".", sLibName) );
           oLibSrc.copy(oLibDst, FileCopyFlags.OVERWRITE);
 
-          if (ok && c.Verbose) { stdout.printf("ok :)\n"); }
+          if (ok && c.Verbose) { verbose("ok :)\n"); }
         }
 
         c.cleanUp(true);
 
         if (!ok) {
-          if (c.Verbose) { stdout.printf("not ok :(\n"); }
+          if (c.Verbose) { verbose("not ok :(\n"); }
         } else {
-          stdout.printf("\nFinished successfully :)\n");
+          verbose("\nFinished successfully :)\n");
         }
       } else {
         stderr.printf("Error retrieving class information\n");
       }
     } catch (Error e) {
-      stderr.printf("\nERROR:\n%s\n", e.message);
+      stderr.printf("%s\n", e.message);
       ok = false;
     }
 
     return ok;
+  }
+
+  public static void verbose(string sText, ...)
+  {
+    string sPrint = sText.vprintf(va_list());
+    print(sPrint);
   }
 
 }
