@@ -9,6 +9,8 @@ So it feels like you could call the Vala class from Java!<br/>
 ## Limitations:
 ### Only possible types:
 You *MUST ONLY* use the following types: string, int, double, float, char, bool, string[], int[], float[], double[]<br/>
+<br/>
+It is only tested on Ubuntu Linux and won't run on Windows. This might change in the future.<br/>
 
 ## Usage
   **mkjni [PARAMS][OPTIONS] &lt;FILE(S)&gt;**
