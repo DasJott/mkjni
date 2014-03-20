@@ -406,6 +406,14 @@ public class JNIFiles : GLib.Object
         {
           sCode = "(*pEnv)->ReleaseIntArrayElements(pEnv, %s, %s, 0);\n".printf( oParam.name + i.to_string(), oParam.cname );
         } break;
+      case DataType.ARR_FLOAT:
+        {
+          sCode = "(*pEnv)->ReleaseFloatArrayElements(pEnv, %s, %s, 0);\n".printf( oParam.name + i.to_string(), oParam.cname );
+        } break;
+      case DataType.ARR_DOUBLE:
+        {
+          sCode = "(*pEnv)->ReleaseDoubleArrayElements(pEnv, %s, %s, 0);\n".printf( oParam.name + i.to_string(), oParam.cname );
+        } break;
       case DataType.ARR_STRING:
         {
           sCode = "free(%s);\n".printf(oParam.cname);
