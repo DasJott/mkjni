@@ -2,7 +2,7 @@
 
 ## Call Vala code from Java
 
-Vala code might be faster or just better to write orsimply more beautiful.<br/>
+Vala code might be faster or just better to write or simply more beautiful.<br/>
 Write some functionality in Vala, specify a class you want to "export" to Java and mkjni creates a jni lib and the Java Class for you.<br/>
 So it feels like you could call the Vala class from Java!<br/>
 
