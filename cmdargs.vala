@@ -34,14 +34,18 @@ public class CmdArgs : GLib.Object
   public bool   PkgDir  { private set; get; default=false; } // -d
   public bool   Verbose { private set; get; default=false; } // -v
   public bool   Compile { private set; get; default=true;  } // -o
-  public bool   NotLink { private set; get; default=false; } // -o
+  public bool   NotLink { private set; get; default=false; } // -n
   public bool   UseTmp  { private set; get; default=false; } // -t
 
   public string[] VFiles    { get { return m_asVFiles;   } } // <FILE(S)>
   public string[] VPackages { get { return m_asVPackages;} } // -p --pkg
+  public string[] CompCmds  { get { return m_asCompCmds; } } // -X --ccmd
+  public string[] ValaCmds  { get { return m_asValaCmds; } } // -V --vcmd
 
   private string[] m_asVFiles    = {};
   private string[] m_asVPackages = {};
+  private string[] m_asCompCmds  = {};
+  private string[] m_asValaCmds  = {};
 
   private CmdArgs() {}
 
@@ -71,9 +75,9 @@ public class CmdArgs : GLib.Object
           case "j":  Package = args[i]; break;
           case "l":  LibName = args[i]; break;
           case "cc": Compler = args[i]; break;
-          case "p":
-            m_asVPackages += args[i];
-            break;
+          case "p":  add2Array(ref m_asVPackages, args[i]); break;
+          case "X":  add2Array(ref m_asCompCmds,  args[i]); break;
+          case "V":  add2Array(ref m_asValaCmds,  args[i]); break;
         }
         opt = null;
       } else {
@@ -96,6 +100,14 @@ public class CmdArgs : GLib.Object
             break;
           case "-cc":
             opt = "cc";
+            break;
+          case "-X":
+          case "--ccmd":
+            opt = "X";
+            break;
+          case "-V":
+          case "--vcmd":
+            opt = "V";
             break;
           case "-d":
             PkgDir = true;
@@ -246,6 +258,22 @@ public class CmdArgs : GLib.Object
     return true;
   }
 
+  private void add2Array(ref string[] array, string sInput)
+  {
+    string[] astmp = array;
+
+    if (sInput.contains(",")) {
+      string[] sValues = sInput.split(",");
+      foreach (string sValue in sValues) {
+        astmp += sValue;
+      }
+    } else {
+      astmp += sInput;
+    }
+
+    array = astmp;
+  }
+
   public void printHelp()
   {
     stderr.printf("\n");
@@ -262,11 +290,15 @@ public class CmdArgs : GLib.Object
     stderr.printf("\n");
     stderr.printf("---- Options: ----\n");
     stderr.printf("\n");
-    stderr.printf("-p, --pkg <package>       Packages to be included (Vala --pkg and pkg-config)\n");
+    stderr.printf("-p, --pkg <package>       Packages to be included (Vala --pkg and pkg-config) *\n");
     stderr.printf("\n");
     stderr.printf("-j, --jns <package>       The Java namespace (package) to be created\n");
     stderr.printf("\n");
     stderr.printf("-cc <compiler>            The compiler to be used (default: gcc)\n");
+    stderr.printf("\n");
+    stderr.printf("-X --ccmd <command>       Additional command, passed to the compiler *\n");
+    stderr.printf("\n");
+    stderr.printf("-V --vcmd <command>       Additional command, passed to valac *\n");
     stderr.printf("\n");
     stderr.printf("-d                        Create Java file in package directory\n");
     stderr.printf("\n");
@@ -280,6 +312,7 @@ public class CmdArgs : GLib.Object
     stderr.printf("\n");
     stderr.printf("-h, --help, -?, ?         Show this help\n");
     stderr.printf("\n");
+    stderr.printf("*) This option can be used multiple times in one call or takes comma separated list\n");
   }
 
 }

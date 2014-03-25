@@ -33,22 +33,22 @@ public class Compiler
     m_sWorkingDir = sWorkDir;
   }
 
-  public bool compile(string[] pkgs)
+  public bool compile(string[]? pkgs=null, string[]? flags=null)
   {
     // never change these command lines!
     string sPkgConfig;
-    bool ok = cmd( "pkg-config --cflags glib-2.0 gobject-2.0%s".printf(getPackages(pkgs)), out sPkgConfig);
+    bool ok = cmd( "pkg-config --cflags glib-2.0 gobject-2.0%s".printf(serialize(pkgs)), out sPkgConfig);
     if (ok) {
-      ok = cmd( "%s -w -fPIC -c %s -I%s *.c".printf(m_sCompiler, sPkgConfig, JniHeaderPath) );
+      ok = cmd( "%s%s -w -fPIC -c %s -I%s *.c".printf(m_sCompiler, serialize(flags), sPkgConfig, JniHeaderPath) );
     }
     return ok;
   }
 
-  public bool link(string sLibName, string[] pkgs)
+  public bool link(string sLibName, string[]? pkgs=null)
   {
     // never change these command lines!
     string sPkgConfig;
-    bool ok = cmd( "pkg-config --libs --static glib-2.0 gobject-2.0%s".printf(getPackages(pkgs)), out sPkgConfig);
+    bool ok = cmd( "pkg-config --libs --static glib-2.0 gobject-2.0%s".printf(serialize(pkgs)), out sPkgConfig);
     if (ok) {
       ok = cmd( "%s -w -shared -o lib%s.so *.o %s".printf(m_sCompiler, sLibName, sPkgConfig) );
     }
@@ -58,7 +58,7 @@ public class Compiler
   public bool make(string sLibName, string[] pkgs)
   {
     string sPkgConfig;
-    bool ok = cmd( "pkg-config --cflags --libs --static glib-2.0 gobject-2.0%s".printf(getPackages(pkgs)), out sPkgConfig );
+    bool ok = cmd( "pkg-config --cflags --libs --static glib-2.0 gobject-2.0%s".printf(serialize(pkgs)), out sPkgConfig );
     if (ok) {
       ok = cmd( "%s -fPIC -shared -o lib%s.so %s -I%s *.c".printf(m_sCompiler, sLibName, sPkgConfig, JniHeaderPath) );
     } return ok;
@@ -70,13 +70,15 @@ public class Compiler
     return false;
   }
 
-  // gets packages string
-  private string getPackages(string[] pkgs)
+  // serializes array
+  private string serialize(string[]? pkgs)
   {
     string res = "";
-    foreach (string pkg in pkgs) {
-      res += " ";
-      res += pkg;
+    if (pkgs != null) {
+      foreach (string pkg in pkgs) {
+        res += " ";
+        res += pkg;
+      }
     }
     return res;
   }

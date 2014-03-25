@@ -63,14 +63,14 @@ public class Processor : GLib.Object
 
         if (ok) {
           if (c.Verbose) { verbose("Make C code from Vala code..."); }
-          ok = ValaFile.compile2Ccode(oValaFile.getPath(), c.VFiles, c.VPackages, oValaFile.getHeaderName());
+          ok = ValaFile.compile2Ccode(oValaFile.getPath(), c.VFiles, c.VPackages, c.ValaCmds, oValaFile.getHeaderName());
           if (ok && c.Verbose) { verbose("ok :)\n"); }
         }
 
         if (ok && c.Compile) {
           if (c.Verbose) { verbose("Compiling sources..."); }
           var oGcc = new Compiler(c.Compler, oValaFile.getPath());
-          ok = oGcc.compile(c.VPackages);
+          ok = oGcc.compile(c.VPackages, c.CompCmds);
           if (ok && c.Verbose) { verbose("ok :)\n"); }
 
           if (!c.NotLink) {

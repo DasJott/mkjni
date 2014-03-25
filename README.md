@@ -28,9 +28,11 @@ Parameter                      | Description
 
 Option                         | Description
 ------------------------------ | ----------------------------------------------------
--p, --pkg &lt;package&gt;      | Packages to be included (Vala --pkg and pkg-config)
+-p, --pkg &lt;package&gt;      | Packages to be included (Vala --pkg and pkg-config) *
 -j, --jns &lt;package&gt;      | The Java namespace (package) to be created
 -cc &lt;compiler&gt;           | The compiler to be used (default: gcc)
+-X --ccmd &lt;command&gt;      | Additional command, passed to the compiler *
+-V --vcmd &lt;command&gt;      | Additional command, passed to valac *
 -d                             | Create Java file in package directory
 -n                             | Not compile, just generate files
 -o                             | Only compile, do not link
@@ -38,7 +40,8 @@ Option                         | Description
 -v                             | Verbose - tell what's going on
 -h, --help                     | for showing help
 
-
+*) *This option can be used multiple times in one call or takes comma separated list*<br/>
+<br/>
 **Note: mkjni creates all files (and directories for java packages) in the directory where it is called.**
 
 ## Example:
