@@ -109,10 +109,10 @@ public class JNIFiles : GLib.Object
         oStream.put_string("%s* %s = NULL;\n".printf(m_oClass.c_getType(), sVarInstance));
         oStream.put_string("%s* getInstance(void)\n".printf(m_oClass.c_getType()));
         oStream.put_string("{\n");
-        oStream.put_string("if (%s == NULL) {\n".printf(sVarInstance));
-        oStream.put_string("%s = %s;\n".printf(sVarInstance, m_oClass.c_getConstructor()));
-        oStream.put_string("}\n");
-        oStream.put_string("return %s;\n".printf(sVarInstance));
+        oStream.put_string("  if (%s == NULL) {\n".printf(sVarInstance));
+        oStream.put_string("    %s = %s;\n".printf(sVarInstance, m_oClass.c_getConstructor()));
+        oStream.put_string("  }\n");
+        oStream.put_string("  return %s;\n".printf(sVarInstance));
         oStream.put_string("}\n");
 
         // destroy singleton
@@ -124,6 +124,7 @@ public class JNIFiles : GLib.Object
         oStream.put_string("}\n");
         oStream.put_string("\n");
 
+        // the method calls
         var sbMethods = new StringBuilder();
         m_oClass.methods.foreach( (oMethod) => {
           sbMethods.append( "%s\n".printf( getMethodSignature(oMethod, true) ) );
@@ -234,6 +235,24 @@ public class JNIFiles : GLib.Object
           sCast += "  %s = (%s)(*pEnv)->GetDoubleArrayElements(pEnv, %s, 0);\n".printf(gvar, gtype, jvar);
           sCast += "}\n";
         } break;
+      case DataType.ARR_CHAR:
+        {
+          sCast += "%s %s;\n".printf(gtype, gvar);
+          sCast += "int %s;\n".printf(arrlen);
+          sCast += "{\n";
+          sCast += "  %s = (*pEnv)->GetArrayLength(pEnv, %s);\n".printf(arrlen, jvar);
+          sCast += "  %s = (%s)(*pEnv)->GetCharArrayElements(pEnv, %s, 0);\n".printf(gvar, gtype, jvar);
+          sCast += "}\n";
+        } break;
+      case DataType.ARR_BYTE:
+        {
+          sCast += "%s %s;\n".printf(gtype, gvar);
+          sCast += "int %s;\n".printf(arrlen);
+          sCast += "{\n";
+          sCast += "  %s = (*pEnv)->GetArrayLength(pEnv, %s);\n".printf(arrlen, jvar);
+          sCast += "  %s = (%s)(*pEnv)->GetByteArrayElements(pEnv, %s, 0);\n".printf(gvar, gtype, jvar);
+          sCast += "}\n";
+        } break;
       case DataType.ARR_STRING:
         {
           sCast += "%s %s;\n".printf(gtype, gvar);
@@ -307,7 +326,9 @@ public class JNIFiles : GLib.Object
         sCall += "%s ret;\n".printf(oMethod.returnType.to_jni_string());
         sCall += "{\n";
         sCall += "int %s=0;\n".printf(oMethod.returnLength);
-        sCall += "jint* tmp = (jint*) %s(%s);\n".printf(
+        sCall += "%s* tmp = (%s*) %s(%s);\n".printf(
+          DataType.INT.to_jni_string(),
+          DataType.INT.to_jni_string(),
           m_oClass.c_getName(oMethod),
           getCCallParams(oMethod, sInstance)
         );
@@ -345,6 +366,36 @@ public class JNIFiles : GLib.Object
           oMethod.returnLength
         );
         sCall += "(*pEnv)->SetDoubleArrayRegion(pEnv, ret, 0, %s, tmp);\n".printf(oMethod.returnLength);
+        sCall += "}\n";
+      } else if (oMethod.returnType == DataType.ARR_CHAR) {
+        sCall += "%s ret;\n".printf(oMethod.returnType.to_jni_string());
+        sCall += "{\n";
+        sCall += "int %s=0;\n".printf(oMethod.returnLength);
+        sCall += "%s* tmp = (%s*) %s(%s);\n".printf(
+          DataType.CHAR.to_jni_string(),
+          DataType.CHAR.to_jni_string(),
+          m_oClass.c_getName(oMethod),
+          getCCallParams(oMethod, sInstance)
+        );
+        sCall += "ret = (*pEnv)->NewCharArray(pEnv, %s);\n".printf(
+          oMethod.returnLength
+        );
+        sCall += "(*pEnv)->SetCharArrayRegion(pEnv, ret, 0, %s, tmp);\n".printf(oMethod.returnLength);
+        sCall += "}\n";
+      } else if (oMethod.returnType == DataType.ARR_BYTE) {
+        sCall += "%s ret;\n".printf(oMethod.returnType.to_jni_string());
+        sCall += "{\n";
+        sCall += "int %s=0;\n".printf(oMethod.returnLength);
+        sCall += "%s* tmp = (%s*) %s(%s);\n".printf(
+          DataType.BYTE.to_jni_string(),
+          DataType.BYTE.to_jni_string(),
+          m_oClass.c_getName(oMethod),
+          getCCallParams(oMethod, sInstance)
+        );
+        sCall += "ret = (*pEnv)->NewByteArray(pEnv, %s);\n".printf(
+          oMethod.returnLength
+        );
+        sCall += "(*pEnv)->SetByteArrayRegion(pEnv, ret, 0, %s, tmp);\n".printf(oMethod.returnLength);
         sCall += "}\n";
       } else {
         sCall = "%s ret = (%s) %s(%s);\n".printf(
@@ -413,6 +464,14 @@ public class JNIFiles : GLib.Object
       case DataType.ARR_DOUBLE:
         {
           sCode = "(*pEnv)->ReleaseDoubleArrayElements(pEnv, %s, %s, 0);\n".printf( oParam.name + i.to_string(), oParam.cname );
+        } break;
+      case DataType.ARR_CHAR:
+        {
+          sCode = "(*pEnv)->ReleaseCharArrayElements(pEnv, %s, %s, 0);\n".printf( oParam.name + i.to_string(), oParam.cname );
+        } break;
+      case DataType.ARR_BYTE:
+        {
+          sCode = "(*pEnv)->ReleaseByteArrayElements(pEnv, %s, %s, 0);\n".printf( oParam.name + i.to_string(), oParam.cname );
         } break;
       case DataType.ARR_STRING:
         {

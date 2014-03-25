@@ -8,8 +8,10 @@ So it feels like you could call the Vala class from Java!<br/>
 
 ## Limitations:
 ### Only possible types:
-You *MUST ONLY* use the following types: string, int, double, float, char, bool, string[], int[], float[], double[]<br/>
+You *MUST ONLY* use the following types: string, int, int8, double, float, char, bool, string[], int[], int8[], float[], double[], char[]<br/>
+**The type int8 in Vala is transformed to byte in Java! So is int8[] in Vala transformed to byte[] in Java**<br/>
 <br/>
+There is created only *ONE* instance of the Vala class, not matter how many instances you create in Java!<br/>
 It is only tested on Ubuntu Linux and won't run on Windows. This might change in the future.<br/>
 
 ## Usage
