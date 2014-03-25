@@ -47,6 +47,7 @@ Option                         | Description
 ## Examples:
   **mkjni -v -t -c MyClass -j de.dasjott.myclass -l superjni *.vala**<br/>
   **mkjni -c MyClass -l superjni -V --disable-assert -V --target-glib=2.32 -X -O3 -p gio-1.0 *.vala**<br/>
+  **mkjni -c MyClass -l superjni -V --disable-assert,--target-glib=2.32 -X -O3 -p gio-1.0 *.vala**<br/>
 
 You should be provided with a result like libsuperjni.so for these examples and a Java file MyClass.java in your current directory.
 
