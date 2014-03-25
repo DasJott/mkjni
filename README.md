@@ -28,11 +28,11 @@ Parameter                      | Description
 
 Option                         | Description
 ------------------------------ | ----------------------------------------------------
--p, --pkg &lt;package&gt;      | Packages to be included (Vala --pkg and pkg-config) *
+-p, --pkg &lt;package(s)&gt;   | Packages to be included (Vala --pkg and pkg-config) *
 -j, --jns &lt;package&gt;      | The Java namespace (package) to be created
 -cc &lt;compiler&gt;           | The compiler to be used (default: gcc)
--X --ccmd &lt;command&gt;      | Additional command, passed to the compiler *
--V --vcmd &lt;command&gt;      | Additional command, passed to valac *
+-X --ccmd &lt;command(s)&gt;   | Additional command, passed to the compiler *
+-V --vcmd &lt;command(s)&gt;   | Additional command, passed to valac *
 -d                             | Create Java file in package directory
 -n                             | Not compile, just generate files
 -o                             | Only compile, do not link
@@ -44,10 +44,11 @@ Option                         | Description
 <br/>
 **Note: mkjni creates all files (and directories for java packages) in the directory where it is called.**
 
-## Example:
-  **mkjni -v -t -c MyClass -j de.dasjott.myclass -l superjni *.vala**
+## Examples:
+  **mkjni -v -t -c MyClass -j de.dasjott.myclass -l superjni *.vala**<br/>
+  **mkjni -c MyClass -l superjni -V --disable-assert -V --target-glib=2.32 -X -O3 -p gio-1.0 *.vala**<br/>
 
-You should be provided with a result like libsuperjni.so for this example and a Java file MyClass.java in your current directory.
+You should be provided with a result like libsuperjni.so for these examples and a Java file MyClass.java in your current directory.
 
 ## Bugs
 If you find bugs, don't feed them, so they'll die over time.<br/>
