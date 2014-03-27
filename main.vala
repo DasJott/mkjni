@@ -26,8 +26,6 @@ class Main
 {
   public static int main(string[] args)
   {
-    //test(); return 0;
-
     bool ok = false;
 
     var oArgs = CmdArgs.parse(args);
@@ -43,39 +41,4 @@ class Main
     }
     return 1;
   }
-
-  /*
-  private static void test()
-  {
-    try {
-      MatchInfo info;
-
-      var regBraceOpen  = new Regex("^.*{[^}]*$");
-
-      string[] ss = new string[] {
-        "{",
-        "  {",
-        "for (int i=0; i<l; ++i) { }",
-        "}",
-        " if (foo) { gabba = 1; }",
-      };
-
-      foreach (string s in ss) {
-        stdout.printf("# \"%s\"\n", s);
-
-        if ( regBraceOpen.match(s, 0, out info) ) {
-          stdout.printf("Match!\n");
-          for (int i=0; i<info.get_match_count(); ++i) {
-            stdout.printf("%i: \"%s\"\n", i, info.fetch(i));
-          }
-        } else {
-          stdout.printf("No match!\n");
-        }
-        stdout.printf("\n");
-      }
-    } catch (Error e) {
-      stderr.printf("%s\n", e.message);
-    }
-  }
-  */
 }
