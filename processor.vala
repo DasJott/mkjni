@@ -34,11 +34,13 @@ public class Processor : GLib.Object
       ValaFile oValaFile = null;
       foreach (string sVFile in c.VFiles) {
         ValaFile oTmpFile = new ValaFile(sVFile);
-        Class oTmpClass = oTmpFile.parse(c.VClass);
-        if (oTmpClass != null) {
-          oClass = oTmpClass;
-          oValaFile = oTmpFile;
-          break;
+        if (!oTmpFile.isVapi()) {
+          Class oTmpClass = oTmpFile.parse(c.VClass);
+          if (oTmpClass != null) {
+            oClass = oTmpClass;
+            oValaFile = oTmpFile;
+            break;
+          }
         }
       }
 
@@ -75,7 +77,7 @@ public class Processor : GLib.Object
 
           if (!c.NotLink) {
             if (c.Verbose) { verbose("Link objects to \"lib%s.so\"...", c.LibName); }
-            ok = oGcc.link(c.LibName, c.VPackages);
+            ok = oGcc.link(c.LibName, c.VPackages, c.ExtLibs);
             if (ok && c.Verbose) { verbose("ok :)\n"); }
           }
         }

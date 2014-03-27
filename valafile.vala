@@ -25,14 +25,21 @@
 public class ValaFile : GLib.Object
 {
   private File m_oFile = null;
+  private bool m_bIsVapi = false;
 
   public ValaFile(string sFilename) throws FileError
   {
     m_oFile = File.new_for_path(sFilename);
+    m_bIsVapi = sFilename.down().has_suffix(".vapi");
 
     if ( ! m_oFile.query_exists() ) {
       throw new FileError.EXIST("File \"%s\" not found\n", sFilename);
     }
+  }
+
+  public bool isVapi()
+  {
+    return m_bIsVapi;
   }
 
   public Class? parse(string sClassname)

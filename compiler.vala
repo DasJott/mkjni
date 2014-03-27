@@ -44,13 +44,13 @@ public class Compiler
     return ok;
   }
 
-  public bool link(string sLibName, string[]? pkgs=null)
+  public bool link(string sLibName, string[]? pkgs=null, string[]? libs=null)
   {
     // never change these command lines!
     string sPkgConfig;
     bool ok = cmd( "pkg-config --libs --static glib-2.0 gobject-2.0%s".printf(serialize(pkgs)), out sPkgConfig);
     if (ok) {
-      ok = cmd( "%s -w -shared -o lib%s.so *.o %s".printf(m_sCompiler, sLibName, sPkgConfig) );
+      ok = cmd( "%s -w -shared -o lib%s.so *.o %s%s".printf(m_sCompiler, sLibName, sPkgConfig, serialize(libs," -l")) );
     }
     return ok;
   }
@@ -71,12 +71,13 @@ public class Compiler
   }
 
   // serializes array
-  private string serialize(string[]? pkgs)
+  private string serialize(string[]? pkgs, string? sDiv=null)
   {
     string res = "";
     if (pkgs != null) {
+      if (sDiv == null) { sDiv = " "; }
       foreach (string pkg in pkgs) {
-        res += " ";
+        res += sDiv;
         res += pkg;
       }
     }

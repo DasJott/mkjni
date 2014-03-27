@@ -33,6 +33,7 @@ Option                         | Description
 -cc &lt;compiler&gt;           | The compiler to be used (default: gcc)
 -X --ccmd &lt;command(s)&gt;   | Additional command, passed to the compiler &#42;
 -V --vcmd &lt;command(s)&gt;   | Additional command, passed to valac &#42;
+-e --ext &lt;lib(s)&gt;        | External dependency's library name. Don't forget the the vapi file. &#42;
 -d                             | Create Java file in package directory
 -n                             | Not compile, just generate files
 -o                             | Only compile, do not link
@@ -46,6 +47,7 @@ Option                         | Description
 
 ## Examples:
   **mkjni -v -t -c MyClass -j de.dasjott.myclass -l superjni *.vala**<br/>
+  **mkjni -v -t -c MyClass -j de.dasjott.myclass -l superjni -e addlib addlib.vapi *.vala**<br/>
   **mkjni -c MyClass -l superjni -V --disable-assert -V --target-glib=2.32 -X -O3 -p gio-1.0 *.vala**<br/>
   **mkjni -c MyClass -l superjni -V --disable-assert,--target-glib=2.32 -X -O3 -p gio-1.0 *.vala**<br/>
 

@@ -41,11 +41,13 @@ public class CmdArgs : GLib.Object
   public string[] VPackages { get { return m_asVPackages;} } // -p --pkg
   public string[] CompCmds  { get { return m_asCompCmds; } } // -X --ccmd
   public string[] ValaCmds  { get { return m_asValaCmds; } } // -V --vcmd
+  public string[] ExtLibs   { get { return m_asExtLibs;  } } // -e --ext
 
   private string[] m_asVFiles    = {};
   private string[] m_asVPackages = {};
   private string[] m_asCompCmds  = {};
   private string[] m_asValaCmds  = {};
+  private string[] m_asExtLibs   = {};
 
   private CmdArgs() {}
 
@@ -74,10 +76,11 @@ public class CmdArgs : GLib.Object
           case "c":  VClass  = args[i]; break;
           case "j":  Package = args[i]; break;
           case "l":  LibName = args[i]; break;
-          case "cc": Compler = args[i]; break;
+          case "C": Compler = args[i]; break;
           case "p":  add2Array(ref m_asVPackages, args[i]); break;
           case "X":  add2Array(ref m_asCompCmds,  args[i]); break;
           case "V":  add2Array(ref m_asValaCmds,  args[i]); break;
+          case "e":  add2Array(ref m_asExtLibs,   args[i]); break;
         }
         opt = null;
       } else {
@@ -99,7 +102,7 @@ public class CmdArgs : GLib.Object
             opt = "p";
             break;
           case "-cc":
-            opt = "cc";
+            opt = "C";
             break;
           case "-X":
           case "--ccmd":
@@ -108,6 +111,10 @@ public class CmdArgs : GLib.Object
           case "-V":
           case "--vcmd":
             opt = "V";
+            break;
+          case "-e":
+          case "--ext":
+            opt = "e";
             break;
           case "-d":
             PkgDir = true;
@@ -299,6 +306,8 @@ public class CmdArgs : GLib.Object
     stderr.printf("-X --ccmd <command>       Additional command, passed to the compiler *\n");
     stderr.printf("\n");
     stderr.printf("-V --vcmd <command>       Additional command, passed to valac *\n");
+    stderr.printf("\n");
+    stderr.printf("-e --ext <lib>            External dependency's library name. Don't forget the the vapi file. *\n");
     stderr.printf("\n");
     stderr.printf("-d                        Create Java file in package directory\n");
     stderr.printf("\n");
