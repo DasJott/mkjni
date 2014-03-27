@@ -1,5 +1,9 @@
 # mkjni
 
+## C code is fast - Vala code is as fast
+If you don't know Vala, you must know, that it is a language, as easy as C# but it compiles first to C and then to machine code.
+So there is the speed advantage of C code and the easyness of C# syntax!<br/>
+
 ## Call Vala code from Java
 
 Vala code might be faster or just better to write or simply more beautiful.<br/>
