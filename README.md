@@ -61,3 +61,4 @@ You should be provided with a result like libsuperjni.so for these examples and 
 If you find bugs, don't feed them, so they'll die over time.<br/>
 You could as well fix them yourself, as you have the code.<br/>
 Or you just call me to come by to squish them. Maybe I will ;)<br/>
+If you like, please [buy me a coffee](https://www.buymeacoffee.com/dasjott). Thank you! :-)
